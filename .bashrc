@@ -20,3 +20,7 @@ do
     source $d/bin/activate
   fi
 done
+
+if [ -f .bashrc_local ]; then
+    . .bashrc_local
+fi
