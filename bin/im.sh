@@ -8,7 +8,10 @@ else
     port=22
 fi
 
-host="localhost"
+host=$IM_HOST
+if [ -z "$IM_HOST" ]; then
+    host="localhost"
+fi
 notify="~/bin/notify-remote.sh"
 
 set -e
