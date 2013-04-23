@@ -12,7 +12,7 @@ host=$IM_HOST
 if [ -z "$IM_HOST" ]; then
     host="localhost"
 fi
-notify="~/bin/notify-remote.sh"
+notify="notify-remote.sh"
 
 set -e
 
