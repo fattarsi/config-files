@@ -1,4 +1,5 @@
 set shell=/bin/bash
+set hlsearch
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -14,6 +15,14 @@ au BufNewFile,BufRead *.py highlight OverLength ctermbg=red ctermfg=white guibg=
 au BufNewFile,BufRead *.py match OverLength /\%81v.\+/
 
 call pathogen#infect()
+
+let g:CommandTMaxHeight=20
+let g:CommandTMatchWindowAtTop=1
+let g:CommandTAcceptSelectionMap='<C-o>'
+let g:CommandTAcceptSelectionTabMap='<CR>'
+
+let g:startify_lists = ['files', 'sessions', 'bookmarks']
+let g:startify_files_number=20
 
 let g:syntastic_check_on_open=0
 let g:syntastic_auto_loc_list=1
