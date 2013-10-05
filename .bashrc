@@ -11,6 +11,9 @@ export EDITOR='/usr/bin/vim'
 PS1="\[\033[1;34m\]\u@\[\033[1;30m\]\h\[\033[1;34m\][\[\033[0;32m\]\w\[\033[1;34m\]]\$(parse_git_branch)\n\[\033[0m\]>"
 PATH=~/bin:$PATH
 
+alias vimwrapper="/usr/bin/vim;echo -ne \"\033]0;${PWD}\007\""
+alias vim="vimwrapper"
+
 p=`pwd`
 for i in `ls ~/.virtualenvs/*/.project`
 do
