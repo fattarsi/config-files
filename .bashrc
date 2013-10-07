@@ -2,6 +2,10 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
+function current_directory {
+    cd $1;ls
+}
+
 function parse_git_branch {
     ref=$(/usr/lib/git-core/git-symbolic-ref HEAD 2> /dev/null) || return
     echo " ("${ref#refs/heads/}")"
@@ -11,6 +15,7 @@ export EDITOR='/usr/bin/vim'
 PS1="\[\033[1;34m\]\u@\[\033[1;30m\]\h\[\033[1;34m\][\[\033[0;32m\]\w\[\033[1;34m\]]\$(parse_git_branch)\n\[\033[0m\]>"
 PATH=~/bin:$PATH
 
+alias cd="current_directory"
 alias vimwrapper="/usr/bin/vim;echo -ne \"\033]0;${PWD}\007\""
 alias vim="vimwrapper"
 
