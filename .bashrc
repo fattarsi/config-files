@@ -3,8 +3,16 @@ if [ -f /etc/bash_completion ]; then
 fi
 
 function current_directory {
-    cd $1;ls
+    cd "$@"; set_title; ls
 }
+
+function set_title {
+    echo -ne "\033]0;${PWD}\007"
+}
+function vim {
+    /usr/bin/vim "$@";set_title
+}
+
 
 function parse_git_branch {
     ref=$(/usr/lib/git-core/git-symbolic-ref HEAD 2> /dev/null) || return
@@ -16,8 +24,6 @@ PS1="\[\033[1;34m\]\u@\[\033[1;30m\]\h\[\033[1;34m\][\[\033[0;32m\]\w\[\033[1;34
 PATH=~/bin:$PATH
 
 alias cd="current_directory"
-alias vimwrapper="/usr/bin/vim;echo -ne \"\033]0;${PWD}\007\""
-alias vim="vimwrapper"
 
 p=`pwd`
 for i in `ls ~/.virtualenvs/*/.project`
@@ -29,6 +35,7 @@ do
   fi
 done
 
+set_title
 if [ -f .bashrc_local ]; then
     . .bashrc_local
 fi
