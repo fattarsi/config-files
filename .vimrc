@@ -18,7 +18,7 @@ call pathogen#infect()
 let g:CommandTMaxHeight=20
 let g:CommandTMatchWindowAtTop=1
 let g:CommandTAcceptSelectionMap='<C-o>'
-"let g:CommandTAcceptSelectionTabMap='<CR>'
+let g:CommandTAcceptSelectionTabMap='<CR>'
 
 let g:startify_change_to_dir=0
 let g:startify_lists = ['files', 'sessions', 'bookmarks']

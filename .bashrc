@@ -36,6 +36,6 @@ do
 done
 
 set_title
-if [ -f .bashrc_local ]; then
-    . .bashrc_local
+if [ -f ~/.bashrc_local ]; then
+    . ~/.bashrc_local
 fi
