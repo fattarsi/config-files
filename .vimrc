@@ -13,7 +13,13 @@ hi StatusLine ctermbg=black ctermfg=gray
 au BufNewFile,BufRead *.py set smartindent
 au BufNewFile,BufRead *.py set colorcolumn=80
 
-call pathogen#infect()
+filetype plugin on
+
+execute pathogen#infect()
+
+let g:jedi#use_tabs_not_buffers = 0
+
+let g:pydiction_location='~/.vim/bundle/pydiction/complete-dict'
 
 let g:CommandTMaxHeight=20
 let g:CommandTMatchWindowAtTop=1
