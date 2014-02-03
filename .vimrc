@@ -1,5 +1,7 @@
 set shell=/bin/bash
 set hlsearch
+set ignorecase
+set smartcase
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -32,7 +34,6 @@ let g:startify_files_number=20
 
 let g:syntastic_check_on_open=0
 let g:syntastic_auto_loc_list=1
-let g:syntastic_python_checker = 'pylint'
 let g:syntastic_enable_highlighting = 1
 
 " Set title string and push it to xterm/screen window title
