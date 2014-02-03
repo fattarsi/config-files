@@ -29,7 +29,7 @@ p=`pwd`
 for i in `ls ~/.virtualenvs/*/.project`
 do
   choice=`cat $i`
-  if [[ "`dirname $p`" = `dirname $choice`* ]]; then
+  if [[ "$p" = "$choice"* ]]; then
     d=`echo $i|rev | cut -c 10- | rev`
     source $d/bin/activate
   fi
