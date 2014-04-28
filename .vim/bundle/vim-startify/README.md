@@ -1,3 +1,5 @@
+[![Stories in Ready](https://badge.waffle.io/mhinz/vim-startify.png?label=ready&title=Ready)](https://waffle.io/mhinz/vim-startify)
+
 ![Example:startify in action](https://github.com/mhinz/vim-startify/raw/master/startify.png)
 
 This is it. A start screen for Vim.  _( all features enabled - freely customizable )_
@@ -25,7 +27,7 @@ How about some ASCII art action?
 
 ---
 
-__Files from directory__ ( _disabled by default_ ):
+__Files from directory__ ( _enabled by default_ ):
 
 This lists all files from the current directory sorted by modification time.
 
