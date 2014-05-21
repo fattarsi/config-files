@@ -5,6 +5,7 @@ set smartcase
 set tabstop=4
 set shiftwidth=4
 set expandtab
+set incsearch
 
 set laststatus=2
 set statusline=%t:%=%l,%c\ (%P)
