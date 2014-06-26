@@ -13,6 +13,12 @@ function vim {
     /usr/bin/vim "$@";set_title
 }
 
+# virtualenvwrapper non-lazy load doesn't seem to work
+# do this if not in a venv to load workon tab completion
+if [ -z "$VIRTUAL_ENV" ]; then
+    workon > /dev/null
+fi
+
 
 function parse_git_branch {
     ref=$(/usr/lib/git-core/git-symbolic-ref HEAD 2> /dev/null) || return
