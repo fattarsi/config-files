@@ -36,8 +36,10 @@ let g:startify_files_number=20
 let g:syntastic_check_on_open=0
 let g:syntastic_auto_loc_list=1
 let g:syntastic_python_checkers=['pylint']
+let g:syntastic_rst_checkers=[]
 let g:syntastic_enable_highlighting = 1
 
+let @i='oimport ipdb;ipdb.set_trace()'
 " Set title string and push it to xterm/screen window title
 " vim <truncate><fullpath>
 set titlestring=%F%m%r%h
