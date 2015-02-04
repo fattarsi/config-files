@@ -1,3 +1,17 @@
+" Vundle
+set nocompatible
+filetype off
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'gmarik/Vundle.vim'
+Plugin 'wincent/command-t'
+
+call vundle#end()
+filetype plugin indent on
+
+" end Vundle
 set shell=/bin/bash
 set hlsearch
 set ignorecase
@@ -10,15 +24,11 @@ set incsearch
 set laststatus=2
 set statusline=%t:%=%l,%c\ (%P)
 set wildignore+=*.doc,*.ebuild,*.gz,*.jpeg,*.jpg,*.mp3,*.o,*.obj,*.pdf,*.png,*.pot,*.ppt,*.pptx,*.pyc,*.rng,*.rtf,*.tar,*.tiff,*.zip,.git,dropbox,projects
-hi StatusLine ctermbg=black ctermfg=gray
 
+hi StatusLine ctermbg=black ctermfg=gray
 
 au BufNewFile,BufRead *.py set smartindent
 au BufNewFile,BufRead *.py set colorcolumn=80
-
-filetype plugin on
-
-execute pathogen#infect()
 
 let g:jedi#use_tabs_not_buffers = 0
 
