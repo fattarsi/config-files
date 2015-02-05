@@ -1,5 +1,8 @@
 /*
 !/.bashrc
+!/.config
+/.config/*
+!/.config/user-dirs.dirs
 !/.gitignore
 !/.vimrc
 !/.xmonad/
