@@ -4,6 +4,7 @@
 /.config/*
 !/.config/user-dirs.dirs
 !/.gitignore
+!/system
 !/.vimrc
 !/.xmonad/
 !/bin/
