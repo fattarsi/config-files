@@ -6,6 +6,7 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
+Plugin 'scrooloose/syntastic'
 Plugin 'wincent/command-t'
 
 call vundle#end()
