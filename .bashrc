@@ -2,6 +2,9 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
+# fix for some gtk based apps
+export NO_AT_BRIDGE=1
+
 function current_directory {
     cd "$@"; set_title; ls
 }
