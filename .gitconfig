@@ -10,7 +10,7 @@
     rbc = rebase --continue
 [user]
 	name = Chris Fattarsi
-	email = chris.fattarsi@pistoncloud.com
+	email = cfattarsi@gmail.com
 [giggle]
 	main-window-maximized = false
 	main-window-geometry = 1206x597+0+55
