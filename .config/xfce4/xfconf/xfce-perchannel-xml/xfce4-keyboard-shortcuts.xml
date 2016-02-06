@@ -51,7 +51,6 @@
       <property name="&lt;Super&gt;f" type="string" value="exo-open --launch FileManager"/>
       <property name="&lt;Primary&gt;Escape" type="string" value="xfce4-popup-whiskermenu"/>
       <property name="XF86Mail" type="string" value="exo-open --launch MailReader"/>
-      <property name="Print" type="string" value="xfce4-screenshooter -f"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;Escape" type="string" value="xkill"/>
       <property name="XF86Music" type="string" value="gmusicbrowser"/>
       <property name="XF86Display" type="string" value="xfce4-display-settings --minimal"/>
@@ -64,6 +63,7 @@
       <property name="&lt;Super&gt;space" type="string" value="xfce4-appfinder"/>
       <property name="XF86Launch1" type="string" value="exo-open --launch TerminalEmulator"/>
       <property name="&lt;Super&gt;e" type="string" value="exo-open --launch TerminalEmulator"/>
+      <property name="Print" type="string" value="xfce4-screenshooter"/>
     </property>
   </property>
   <property name="xfwm4" type="empty">

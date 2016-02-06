@@ -30,6 +30,7 @@ function parse_git_branch {
 
 export EDITOR='/usr/bin/vim'
 PS1="\[\033[1;34m\]\u@\[\033[1;30m\]\h\[\033[1;34m\][\[\033[0;32m\]\w\[\033[1;34m\]]\$(parse_git_branch)\n\[\033[0m\]>"
+PATH=~/projects/android-sdk-linux/tools:$PATH
 PATH=~/bin:$PATH
 
 alias cd="current_directory"

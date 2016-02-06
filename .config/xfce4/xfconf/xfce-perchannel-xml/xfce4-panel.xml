@@ -62,6 +62,7 @@
         <value type="string" value="networkmanager applet"/>
         <value type="string" value="google-chrome-stable"/>
         <value type="string" value="task manager"/>
+        <value type="string" value="skype"/>
         <value type="string" value="blueman-applet"/>
         <value type="string" value="xfce4-power-manager"/>
         <value type="string" value="scp-dbus-service.py"/>
@@ -76,6 +77,8 @@
         <value type="string" value="com.canonical.indicator.sound"/>
         <value type="string" value="com.canonical.indicator.power"/>
         <value type="string" value="com.canonical.indicator.messages"/>
+        <value type="string" value="com.canonical.indicator.network"/>
+        <value type="string" value="com.canonical.indicator.bluetooth"/>
       </property>
     </property>
     <property name="plugin-8" type="string" value="tasklist"/>
