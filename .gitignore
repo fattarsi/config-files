@@ -21,3 +21,6 @@
 !/.vimrc
 !/.xmonad/
 !/bin/
+/bin/*
+!/bin/im.sh
+!/bin/rm-old-kernels.sh
