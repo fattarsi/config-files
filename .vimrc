@@ -24,7 +24,7 @@ set incsearch
 
 set laststatus=2
 set statusline=%t:%=%l,%c\ (%P)
-set wildignore+=*.doc,*.ebuild,*.gz,*.jpeg,*.jpg,*.mp3,*.o,*.obj,*.pdf,*.png,*.pot,*.ppt,*.pptx,*.pyc,*.rng,*.rtf,*.tar,*.tiff,*.zip,.git,dropbox,projects,misc,**/node_modules/*
+set wildignore+=*.doc,*.ebuild,*.gz,*.jpeg,*.jpg,*.mp3,*.o,*.obj,*.pdf,*.png,*.pot,*.ppt,*.pptx,*.pyc,*.rng,*.rtf,*.tar,*.tiff,*.zip,.git,dropbox,projects,misc,**/node_modules/*,bin/*,eggs/*
 
 "rg project
 set wildignore+=mobile/plugins/**,mobile/platforms/**
