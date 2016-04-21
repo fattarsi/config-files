@@ -9,6 +9,9 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'wincent/command-t'
 
+Bundle 'mattn/webapi-vim'
+Bundle 'mattn/gist-vim'
+
 call vundle#end()
 filetype plugin indent on
 
