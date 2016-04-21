@@ -34,6 +34,7 @@ PATH=~/projects/android-sdk-linux/tools:$PATH
 PATH=~/bin:$PATH
 
 alias cd="current_directory"
+alias sl="sl -Fal"
 
 p=`pwd`
 for i in `ls ~/.virtualenvs/*/.project`
