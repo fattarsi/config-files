@@ -61,9 +61,9 @@
       <property name="override" type="bool" value="true"/>
       <property name="&lt;Super&gt;space" type="string" value="xfce4-appfinder"/>
       <property name="XF86Launch1" type="string" value="exo-open --launch TerminalEmulator"/>
-      <property name="&lt;Super&gt;e" type="string" value="exo-open --launch TerminalEmulator"/>
       <property name="Print" type="string" value="xfce4-screenshooter"/>
       <property name="&lt;Primary&gt;&lt;Alt&gt;l" type="string" value="xflock4"/>
+      <property name="&lt;Super&gt;e" type="string" value="terminator"/>
     </property>
   </property>
   <property name="xfwm4" type="empty">

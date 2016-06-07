@@ -4,6 +4,7 @@
 !/.config
 /.config/*
 !/.config/user-dirs.dirs
+!/.config/terminator
 
 !/.config/xfce4/
 /.config/xfce4/*

@@ -1,0 +1,26 @@
+[global_config]
+  focus = sloppy
+  window_state = fullscreen
+  handle_size = 1
+  title_transmit_bg_color = "#0b0ab4"
+[keybindings]
+  new_tab = None
+  split_vert = <Primary><Shift>t
+[profiles]
+  [[default]]
+    scrollbar_position = hidden
+    scrollback_lines = 5000
+    background_image = None
+    icon_bell = False
+    show_titlebar = False
+    cursor_blink = False
+[layouts]
+  [[default]]
+    [[[child1]]]
+      profile = default
+      type = Terminal
+      parent = window0
+    [[[window0]]]
+      type = Window
+      parent = ""
+[plugins]
