@@ -1,18 +1,27 @@
 [global_config]
-  focus = sloppy
   window_state = fullscreen
+  title_transmit_bg_color = "#2d2d2d"
   handle_size = 1
-  title_transmit_bg_color = "#0b0ab4"
+  inactive_color_offset = 0.5
+  focus = mouse
 [keybindings]
-  new_tab = None
+  reset = None
+  go_up = <Shift>Up
+  go_down = <Shift>Down
   split_vert = <Primary><Shift>t
+  go_right = <Shift>Right
+  new_tab = None
+  go_left = <Shift>Left
 [profiles]
   [[default]]
-    scrollbar_position = hidden
-    scrollback_lines = 5000
     background_image = None
+    background_darkness = 0.9
+    scrollback_lines = 5000
+    scrollbar_position = hidden
+    foreground_color = "#657b83"
     icon_bell = False
-    show_titlebar = False
+    show_titlebar = True
+    background_color = "#fdf6e3"
     cursor_blink = False
 [layouts]
   [[default]]
