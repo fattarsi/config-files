@@ -11,6 +11,7 @@ Plugin 'wincent/command-t'
 
 Bundle 'mattn/webapi-vim'
 Bundle 'mattn/gist-vim'
+Bundle 'mhinz/vim-startify'
 
 call vundle#end()
 filetype plugin indent on
