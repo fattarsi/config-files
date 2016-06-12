@@ -2,7 +2,7 @@
   window_state = fullscreen
   title_transmit_bg_color = "#2d2d2d"
   handle_size = 1
-  inactive_color_offset = 0.5
+  inactive_color_offset = -0.40
   focus = mouse
 [keybindings]
   reset = None
