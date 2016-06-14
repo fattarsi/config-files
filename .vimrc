@@ -1,9 +1,11 @@
 " remap keys
 map <S-Left> gT
 map <S-Right> gt
+map <C-w> :q<Enter>
 
 imap <S-Left> <Esc>gT
 imap <S-Right> <Esc>gt
+imap <C-w> <Esc>:q<Enter>
 
 " Vundle
 set nocompatible
