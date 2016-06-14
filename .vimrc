@@ -1,3 +1,10 @@
+" remap keys
+map <S-Left> gT
+map <S-Right> gt
+
+imap <S-Left> <Esc>gT
+imap <S-Right> <Esc>gt
+
 " Vundle
 set nocompatible
 filetype off
