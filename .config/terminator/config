@@ -1,17 +1,17 @@
 [global_config]
-  window_state = fullscreen
+  window_state = normal
   title_transmit_bg_color = "#2d2d2d"
   handle_size = 1
   inactive_color_offset = -0.40
   focus = mouse
 [keybindings]
   reset = None
-  go_up = <Shift>Up
-  go_down = <Shift>Down
+  go_up = <Alt>Up
+  go_down = <Alt>Down
   split_vert = <Primary><Shift>t
-  go_right = <Shift>Right
+  go_right = <Alt>Right
   new_tab = None
-  go_left = <Shift>Left
+  go_left = <Alt>Left
 [profiles]
   [[default]]
     background_image = None
