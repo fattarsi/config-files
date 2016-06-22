@@ -62,6 +62,7 @@ let g:CommandTAcceptSelectionTabMap='<CR>'
 let g:startify_change_to_dir=0
 let g:startify_lists = ['files', 'sessions', 'bookmarks']
 let g:startify_files_number=20
+let g:startify_enable_special=0
 
 let g:syntastic_check_on_open=0
 let g:syntastic_auto_loc_list=1
