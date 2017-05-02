@@ -1,11 +1,18 @@
-" remap keys
+" switch between windows with alt+arrow keys
+nnoremap <C-Left> <C-w>h
+nnoremap <C-Right> <C-w>l
+nnoremap <C-Up> <C-w>k
+nnoremap <C-Down> <C-w>j
+
+" close tabs similar to browser
+map <C-w> :q<Enter>
+imap <C-w> <Esc>:q<Enter>
+
+" move between tabs with shift+arrow keys
 map <S-Left> gT
 map <S-Right> gt
-map <C-w> :q<Enter>
-
 imap <S-Left> <Esc>gT
 imap <S-Right> <Esc>gt
-imap <C-w> <Esc>:q<Enter>
 
 " Vundle
 set nocompatible
@@ -17,6 +24,9 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'wincent/command-t'
+Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'eugen0329/vim-esearch'
+Plugin 'tpope/vim-fugitive'
 
 Bundle 'mattn/webapi-vim'
 Bundle 'mattn/gist-vim'
