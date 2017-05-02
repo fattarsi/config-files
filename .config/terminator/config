@@ -1,35 +1,34 @@
 [global_config]
-  window_state = normal
-  title_transmit_bg_color = "#2d2d2d"
-  handle_size = 1
-  inactive_color_offset = -0.40
   focus = mouse
+  handle_size = 1
+  inactive_color_offset = -0.4
+  title_transmit_bg_color = "#2d2d2d"
 [keybindings]
-  reset = None
-  go_up = <Alt>Up
-  go_down = <Alt>Down
-  split_vert = <Primary><Shift>t
-  go_right = <Alt>Right
   new_tab = None
-  go_left = <Alt>Left
-[profiles]
-  [[default]]
-    background_image = None
-    background_darkness = 0.9
-    scrollback_lines = 5000
-    scrollbar_position = hidden
-    foreground_color = "#657b83"
-    icon_bell = False
-    show_titlebar = True
-    background_color = "#fdf6e3"
-    cursor_blink = False
+  reset = None
+  split_vert = <Primary><Shift>t
+  zoom_in = <Primary><Shift>plus
+  zoom_out = <Primary>minus
 [layouts]
   [[default]]
     [[[child1]]]
+      parent = window0
       profile = default
       type = Terminal
-      parent = window0
     [[[window0]]]
-      type = Window
       parent = ""
+      type = Window
 [plugins]
+[profiles]
+  [[default]]
+    background_color = "#fdf6e3"
+    background_darkness = 0.9
+    background_image = None
+    cursor_blink = False
+    cursor_color = "#574d4d"
+    font = Monospace 12
+    foreground_color = "#657b83"
+    icon_bell = False
+    scrollback_lines = 15000
+    scrollbar_position = hidden
+    use_system_font = False
