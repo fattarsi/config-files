@@ -1,7 +1,7 @@
 [global_config]
   focus = mouse
   handle_size = 1
-  inactive_color_offset = -0.4
+  inactive_color_offset = -0.9
   title_transmit_bg_color = "#2d2d2d"
 [keybindings]
   new_tab = None
