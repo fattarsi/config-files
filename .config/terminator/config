@@ -11,13 +11,69 @@
   zoom_out = <Primary>minus
 [layouts]
   [[default]]
-    [[[child1]]]
-      parent = window0
+    [[[child0]]]
+      fullscreen = False
+      last_active_window = True
+      maximised = False
+      order = 0
+      parent = ""
+      size = 1367, 848
+      title = /home/cfattars
+      type = Window
+    [[[terminal1]]]
+      order = 0
+      parent = child0
       profile = default
       type = Terminal
-    [[[window0]]]
+  [[code]]
+    [[[child0]]]
+      fullscreen = False
+      last_active_window = True
+      maximised = True
+      order = 0
       parent = ""
+      position = 0:39
+      size = 2560, 1336
+      title = /home/cfattars
       type = Window
+    [[[child1]]]
+      order = 0
+      parent = child0
+      position = 1279
+      ratio = 0.4998046875
+      type = HPaned
+    [[[child3]]]
+      order = 1
+      parent = child1
+      position = 467
+      ratio = 0.349925149701
+      type = VPaned
+    [[[child5]]]
+      order = 1
+      parent = child3
+      position = 388
+      ratio = 0.447580645161
+      type = VPaned
+    [[[terminal2]]]
+      order = 0
+      parent = child1
+      profile = default
+      type = Terminal
+    [[[terminal4]]]
+      order = 0
+      parent = child3
+      profile = default
+      type = Terminal
+    [[[terminal6]]]
+      order = 0
+      parent = child5
+      profile = default
+      type = Terminal
+    [[[terminal7]]]
+      order = 1
+      parent = child5
+      profile = default
+      type = Terminal
 [plugins]
 [profiles]
   [[default]]
