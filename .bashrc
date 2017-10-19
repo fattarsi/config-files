@@ -6,7 +6,7 @@ fi
 export NO_AT_BRIDGE=1
 
 function current_directory {
-    cd "$@"; set_title; ls
+    cd "$@"; set_title; tree -C -L 2"$@"
 }
 
 function set_title {
