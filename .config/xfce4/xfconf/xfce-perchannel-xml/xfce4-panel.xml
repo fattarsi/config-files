@@ -14,8 +14,9 @@
         <value type="int" value="19"/>
         <value type="int" value="7"/>
         <value type="int" value="17"/>
-        <value type="int" value="9"/>
+        <value type="int" value="16"/>
         <value type="int" value="6"/>
+        <value type="int" value="9"/>
         <value type="int" value="2"/>
         <value type="int" value="12"/>
         <value type="int" value="4"/>
@@ -111,11 +112,13 @@
     <property name="plugin-7" type="string" value="clock">
       <property name="digital-format" type="string" value="%A %b %d %R"/>
     </property>
-    <property name="plugin-6" type="string" value="clock">
-      <property name="timezone" type="string" value="PST8PDT"/>
-      <property name="digital-format" type="string" value="SF %R"/>
-    </property>
     <property name="plugin-9" type="string" value="power-manager-plugin"/>
+    <property name="plugin-6" type="string" value="launcher">
+      <property name="items" type="array">
+        <value type="string" value="14967858251.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-16" type="string" value="xfce4-orageclock-plugin"/>
   </property>
   <property name="configver" type="int" value="2"/>
 </channel>

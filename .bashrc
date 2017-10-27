@@ -6,7 +6,7 @@ fi
 export NO_AT_BRIDGE=1
 
 function current_directory {
-    cd "$@"; set_title; tree -C -L 2"$@"
+    cd "$@"; set_title; ls --color --group-directories-first -g --width=3 -h
 }
 
 function set_title {

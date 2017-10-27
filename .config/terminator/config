@@ -1,5 +1,6 @@
 [global_config]
   focus = mouse
+  geometry_hinting = False
   handle_size = 1
   inactive_color_offset = -0.9
   title_transmit_bg_color = "#2d2d2d"
@@ -17,7 +18,7 @@
       maximised = False
       order = 0
       parent = ""
-      size = 1367, 848
+      size = 1550, 1024
       title = /home/cfattars
       type = Window
     [[[terminal1]]]

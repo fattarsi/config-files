@@ -21,12 +21,14 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
+" After updating run `vim +PluginInstall +qall`
 Plugin 'gmarik/Vundle.vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'wincent/command-t'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'eugen0329/vim-esearch'
 Plugin 'tpope/vim-fugitive'
+Bundle 'hrj/vim-DrawIt'
 
 Bundle 'mattn/webapi-vim'
 Bundle 'mattn/gist-vim'
@@ -68,6 +70,7 @@ let g:CommandTMaxHeight=20
 let g:CommandTMatchWindowReverse=0
 let g:CommandTAcceptSelectionMap='<C-o>'
 let g:CommandTAcceptSelectionTabMap='<CR>'
+let g:CommandTTraverseSCM='pwd'
 
 let g:startify_change_to_dir=0
 let g:startify_lists = ['files', 'sessions', 'bookmarks']

@@ -66,6 +66,7 @@
       <property name="&lt;Primary&gt;&lt;Alt&gt;l" type="string" value="xflock4"/>
       <property name="&lt;Super&gt;e" type="string" value="terminator"/>
       <property name="&lt;Shift&gt;&lt;Super&gt;e" type="string" value="terminator -l code"/>
+      <property name="Control_R" type="string" value="xte &apos;mouseclick 2&apos;"/>
     </property>
   </property>
   <property name="xfwm4" type="empty">
