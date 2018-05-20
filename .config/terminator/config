@@ -8,7 +8,7 @@
   new_tab = None
   reset = None
   split_vert = <Primary><Shift>t
-  zoom_in = <Primary><Shift>plus
+  zoom_in = <Primary>equal
   zoom_out = <Primary>minus
 [layouts]
   [[default]]
@@ -18,7 +18,7 @@
       maximised = False
       order = 0
       parent = ""
-      size = 1550, 1024
+      size = 1971, 1190
       title = /home/cfattars
       type = Window
     [[[terminal1]]]
@@ -86,6 +86,7 @@
     font = Monospace 12
     foreground_color = "#657b83"
     icon_bell = False
+    scroll_on_output = False
     scrollback_lines = 15000
     scrollbar_position = hidden
     use_system_font = False
