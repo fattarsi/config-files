@@ -2,6 +2,12 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
+# kubectl autocomplete
+source <(kubectl completion bash)
+alias kpo="kubectl get po --all-namespaces"
+alias k="kubectl"
+complete -o default -F __start_kubectl k
+
 # fix for some gtk based apps
 export NO_AT_BRIDGE=1
 
