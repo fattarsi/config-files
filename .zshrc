@@ -1,5 +1,15 @@
+# zsh config
 source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+export EDITOR="vim"
+
+#autoload -U add-zsh-hook
+#add-zsh-hook -Uz chpwd (){
+#  ls --color --group-directories-first -g --width=3 -h;
+#}
+
+# oh-my-zsh
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -70,6 +80,7 @@ plugins=(
   helm
   kubectl
   minikube
+  terminator
   virtualenvwrapper
 )
 

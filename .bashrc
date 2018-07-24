@@ -8,6 +8,9 @@ alias kpo="kubectl get po --all-namespaces"
 alias k="kubectl"
 complete -o default -F __start_kubectl k
 
+# dev container
+alias dev="docker run -it dev"
+
 # fix for some gtk based apps
 export NO_AT_BRIDGE=1
 
@@ -38,6 +41,9 @@ export EDITOR='/usr/bin/vim'
 PS1="\[\033[1;34m\]\u@\[\033[1;30m\]\h\[\033[1;34m\][\[\033[0;32m\]\w\[\033[1;34m\]]\$(parse_git_branch)\n\[\033[0m\]>"
 PATH=~/projects/android-sdk-linux/tools:$PATH
 PATH=~/bin:$PATH
+PATH=/usr/local/go/bin:$PATH
+PATH=$PATH:~/go/bin
+PATH=$PATH:~/.pyenv/bin
 
 alias cd="current_directory"
 alias sl="sl -Fal"

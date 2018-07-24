@@ -5,8 +5,8 @@ nnoremap <C-Up> <C-w>k
 nnoremap <C-Down> <C-w>j
 
 " close tabs similar to browser
-map <C-w> :q<Enter>
-imap <C-w> <Esc>:q<Enter>
+"map <C-w> :q<Enter>
+"imap <C-w> <Esc>:q<Enter>
 
 " move between tabs with shift+arrow keys
 map <S-Left> gT

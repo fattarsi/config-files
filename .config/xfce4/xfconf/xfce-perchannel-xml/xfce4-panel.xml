@@ -33,6 +33,7 @@
       <property name="mode" type="uint" value="0"/>
       <property name="autohide-behavior" type="uint" value="0"/>
       <property name="output-name" type="string" value=""/>
+      <property name="nrows" type="uint" value="1"/>
     </property>
     <property name="panel-1" type="empty">
       <property name="position" type="string" value="p=8;x=73;y=741"/>
@@ -50,6 +51,7 @@
       <property name="background-alpha" type="uint" value="80"/>
       <property name="autohide-behavior" type="uint" value="0"/>
       <property name="output-name" type="string" value=""/>
+      <property name="nrows" type="uint" value="1"/>
     </property>
   </property>
   <property name="plugins" type="empty">
@@ -68,10 +70,12 @@
         <value type="string" value="google-chrome-stable"/>
         <value type="string" value="task manager"/>
         <value type="string" value="skype"/>
+        <value type="string" value="network"/>
         <value type="string" value="keybase"/>
         <value type="string" value="blueman-applet"/>
         <value type="string" value="xfce4-power-manager"/>
         <value type="string" value="scp-dbus-service.py"/>
+        <value type="string" value="slack"/>
       </property>
     </property>
     <property name="plugin-5" type="string" value="indicator">
@@ -99,7 +103,7 @@
     <property name="plugin-12" type="string" value="systemload"/>
     <property name="plugin-13" type="string" value="actions"/>
     <property name="plugin-14" type="string" value="directorymenu">
-      <property name="base-directory" type="string" value="/home/fattarsi"/>
+      <property name="base-directory" type="string" value="/home/cfattars"/>
     </property>
     <property name="plugin-17" type="string" value="separator">
       <property name="expand" type="bool" value="true"/>
@@ -111,6 +115,7 @@
     </property>
     <property name="plugin-7" type="string" value="clock">
       <property name="digital-format" type="string" value="%A %b %d %R"/>
+      <property name="timezone" type="string" value="America/Los_Angeles"/>
     </property>
     <property name="plugin-9" type="string" value="power-manager-plugin"/>
     <property name="plugin-6" type="string" value="launcher">
