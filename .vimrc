@@ -28,7 +28,7 @@ Plugin 'wincent/command-t'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'eugen0329/vim-esearch'
 Plugin 'tpope/vim-fugitive'
-Bundle 'fatih/vim-go'
+"Bundle 'fatih/vim-go'
 Bundle 'hrj/vim-DrawIt'
 
 Bundle 'mattn/webapi-vim'
@@ -71,7 +71,8 @@ let g:CommandTMaxHeight=20
 let g:CommandTMatchWindowReverse=0
 let g:CommandTAcceptSelectionMap='<C-o>'
 let g:CommandTAcceptSelectionTabMap='<CR>'
-let g:CommandTTraverseSCM='pwd'
+"pwd does not work well with startify
+"let g:CommandTTraverseSCM='pwd'
 
 "let g:startify_change_to_dir=0
 "let g:startify_lists = ['files', 'sessions', 'bookmarks']

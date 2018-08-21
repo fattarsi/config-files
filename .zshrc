@@ -1,4 +1,4 @@
-# zsh config
+### zsh config
 source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
@@ -114,3 +114,10 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# tab completion to work more like bash
+setopt noautomenu
+setopt nomenucomplete
+
+# ctrl+j to enter autocomplete menu
+bindkey '^j' menu-complete
