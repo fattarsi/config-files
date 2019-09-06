@@ -1,6 +1,6 @@
 ### zsh config
-source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/local/bin/virtualenvwrapper.sh
+source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 export EDITOR="vim"
 
@@ -12,10 +12,10 @@ export EDITOR="vim"
 # oh-my-zsh
 
 # If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
+  export PATH=$HOME/bin:$HOME/go/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-  export ZSH="/home/cfattars/.oh-my-zsh"
+  export ZSH="/Users/fattarsi/.oh-my-zsh"
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -77,11 +77,7 @@ ZSH_THEME="aphrodite"
 plugins=(
   docker
   git
-  helm
   kubectl
-  minikube
-  terminator
-  virtualenvwrapper
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -115,9 +111,15 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+alias k="kubectl"
+
 # tab completion to work more like bash
 setopt noautomenu
 setopt nomenucomplete
 
 # ctrl+j to enter autocomplete menu
 bindkey '^j' menu-complete
+bindkey '^[[Z' autosuggest-accept
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
