@@ -2,6 +2,8 @@
 source /usr/local/bin/virtualenvwrapper.sh
 source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
+NEWLINE=$'\n'
+export PROMPT="%F{027}%n%F{007}@%F{008}%m[%F{034}%~%F{008}]${NEWLINE}%F{007}>"
 export EDITOR="vim"
 
 #autoload -U add-zsh-hook
