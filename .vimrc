@@ -76,6 +76,7 @@ let g:CommandTAcceptSelectionMap='<C-o>'
 let g:CommandTAcceptSelectionTabMap='<CR>'
 "pwd does not work well with startify
 "let g:CommandTTraverseSCM='pwd'
+nnoremap \t :KommandT<CR>
 
 "let g:startify_change_to_dir=0
 "let g:startify_lists = ['files', 'sessions', 'bookmarks']

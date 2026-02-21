@@ -2,6 +2,8 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
+export DOTNET_ROOT=$HOME/.dotnet
+
 # kubectl autocomplete
 source <(kubectl completion bash)
 alias kpo="kubectl get po --all-namespaces"
@@ -44,6 +46,7 @@ PATH=~/bin:$PATH
 PATH=/usr/local/go/bin:$PATH
 PATH=$PATH:~/go/bin
 PATH=$PATH:~/.pyenv/bin
+PATH=$PATH:$HOME/.dotnet:$HOME/.dotnet/tools
 
 alias cd="current_directory"
 alias sl="sl -Fal"

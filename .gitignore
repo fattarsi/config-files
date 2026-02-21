@@ -1,28 +1,47 @@
+# Ignore everything by default
 /*
-!/.bashrc
-!/.zshrc
 
-!/.config
-/.config/*
-!/.config/user-dirs.dirs
-!/.config/terminator
+# Shell configs
+!.bashrc
+!.zshrc
+!.vimrc
+!.gitconfig
+!.gitignore
 
-!/.config/xfce4/
-/.config/xfce4/*
-!/.config/xfce4/xfconf/
-/.config/xfce4/xfconf/*
-!/.config/xfce4/xfconf/xfce-perchannel-xml/
-/.config/xfce4/xfconf/xfce-perchannel-xml/*
-!/.config/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
-!/.config/xfce4/xfconf/xfce-perchannel-xml/keyboards.xml
-!/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
-!/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+# Terminator
+!.config
+.config/*
+!.config/terminator
+.config/terminator/*
+!.config/terminator/config
 
-!/.gitignore
-!/system
-!/.vimrc
-!/.xmonad/
-!/bin/
-/bin/*
-!/bin/im.sh
-!/bin/rm-old-kernels.sh
+# XDG user dirs
+!.config/user-dirs.dirs
+
+# XFCE4
+!.config/xfce4
+.config/xfce4/*
+!.config/xfce4/xfconf
+.config/xfce4/xfconf/*
+!.config/xfce4/xfconf/xfce-perchannel-xml
+.config/xfce4/xfconf/xfce-perchannel-xml/*
+!.config/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
+!.config/xfce4/xfconf/xfce-perchannel-xml/keyboards.xml
+!.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
+!.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+
+# Awesome WM
+!.config/awesome
+.config/awesome/*
+!.config/awesome/rc.lua
+!.config/awesome/battery.lua
+!.config/awesome/locker.sh
+!.config/awesome/.xprofile
+!.config/awesome/.Xresources
+
+# Bin scripts
+!bin
+bin/*
+!bin/volume-hotkeys.sh
+!bin/speech_to_text.sh
+!bin/external-only.sh

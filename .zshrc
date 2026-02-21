@@ -1,10 +1,14 @@
 ### zsh config
-source /usr/local/bin/virtualenvwrapper.sh
+#source /usr/local/bin/virtualenvwrapper.sh
+#source ./.local/bin/virtualenvwrapper.sh
 source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 NEWLINE=$'\n'
 export PROMPT="%F{027}%n%F{007}@%F{008}%m[%F{034}%~%F{008}]${NEWLINE}%F{007}>"
 export EDITOR="vim"
+
+autoload -Uz compinit && compinit
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
 #autoload -U add-zsh-hook
 #add-zsh-hook -Uz chpwd (){
@@ -14,10 +18,10 @@ export EDITOR="vim"
 # oh-my-zsh
 
 # If you come from bash you might have to change your $PATH.
-  export PATH=$HOME/bin:$HOME/go/bin:$PATH
+  export PATH=$HOME/bin:/usr/local/go/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-  export ZSH="/Users/fattarsi/.oh-my-zsh"
+  export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -68,6 +72,10 @@ ZSH_THEME="aphrodite"
 # or set a custom format using the strftime function format specifications,
 # see 'man strftime' for details.
 # HIST_STAMPS="mm/dd/yyyy"
+HISTFILE=~/.histfile
+HISTSIZE=1000
+SAVEHIST=1000
+setopt appendhistory
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
@@ -83,7 +91,7 @@ plugins=(
   zsh-z
 )
 
-source $ZSH/oh-my-zsh.sh
+#source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -132,3 +140,13 @@ function chpwd() {
     emulate -L zsh
     ls
 }
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# opencode
+export PATH=/home/fattarsi/.opencode/bin:$PATH
+
+# Rig environment variables
+[ -f ~/.config/rig/env.sh ] && source ~/.config/rig/env.sh
