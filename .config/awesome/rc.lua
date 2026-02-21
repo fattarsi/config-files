@@ -65,7 +65,7 @@ end
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
-beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+beautiful.init(gears.filesystem.get_configuration_dir() .. "themes/default/theme.lua")
 beautiful.wallpaper = '/usr/share/xfce4/backdrops/Journey_home_by_Juliette_Taka.png'
 
 -- This is used later as the default terminal and editor to run.
@@ -649,7 +649,7 @@ client.connect_signal("focus", function(c)
 end)
 client.connect_signal("unfocus", function(c)
     c.border_color = beautiful.border_normal
-    c.opacity = 0.4
+    c.opacity = 0.75
 end)
 -- }}}
 
