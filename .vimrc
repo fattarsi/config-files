@@ -74,8 +74,8 @@ let g:CommandTMaxHeight=20
 let g:CommandTMatchWindowReverse=0
 let g:CommandTAcceptSelectionMap='<C-o>'
 let g:CommandTAcceptSelectionTabMap='<CR>'
-"pwd does not work well with startify
-"let g:CommandTTraverseSCM='pwd'
+let g:CommandTTraverseSCM='pwd'
+let g:CommandTFileScanner='find'
 nnoremap \t :KommandT<CR>
 
 "let g:startify_change_to_dir=0
