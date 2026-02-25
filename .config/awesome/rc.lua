@@ -13,6 +13,7 @@ local battery = require("battery")
 local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
+-- naughty default position is top_right
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
@@ -37,6 +38,53 @@ local function focus_client_under_mouse()
         end,
     }
 end
+
+-- {{{ Workspace labels
+tag_labels = {}      -- manual labels keyed by tag object (global for awesome-client access)
+
+local tag_labels_path = os.getenv("HOME") .. "/.cache/awesome/tag_labels"
+
+local function save_tag_labels()
+    os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
+    local f = io.open(tag_labels_path, "w")
+    if not f then return end
+    for t, label in pairs(tag_labels) do
+        if t.screen and t.index then
+            f:write(t.screen.index .. "," .. t.index .. "," .. label .. "\n")
+        end
+    end
+    f:close()
+end
+
+local function load_tag_labels()
+    local f = io.open(tag_labels_path, "r")
+    if not f then return end
+    for line in f:lines() do
+        local si, ti, label = line:match("^(%d+),(%d+),(.+)$")
+        if si and ti and label then
+            local s = screen[tonumber(si)]
+            if s then
+                local t = s.tags[tonumber(ti)]
+                if t then
+                    tag_labels[t] = label
+                    t:emit_signal("property::name")
+                end
+            end
+        end
+    end
+    f:close()
+end
+
+local function get_display_label(t)
+    local num = t.index or t.name
+    local label = tag_labels[t]
+    if label then
+        return num .. ": " .. label
+    else
+        return tostring(num)
+    end
+end
+-- }}}
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -199,6 +247,49 @@ end
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
+-- {{{ Tag switch popup
+local tag_popup_widget = wibox.widget {
+    id     = "text_role",
+    align  = "center",
+    valign = "center",
+    font   = "sans bold 48",
+    widget = wibox.widget.textbox,
+}
+
+local tag_popup = awful.popup {
+    widget = {
+        tag_popup_widget,
+        margins = 24,
+        widget  = wibox.container.margin,
+    },
+    bg            = "#222222ee",
+    shape         = function(cr, w, h) gears.shape.rounded_rect(cr, w, h, 12) end,
+    ontop         = true,
+    visible       = false,
+    placement     = awful.placement.centered,
+}
+
+local tag_popup_timer = gears.timer {
+    timeout     = 0.5,
+    single_shot = true,
+    callback    = function()
+        tag_popup.visible = false
+    end,
+}
+
+local function show_tag_popup(t)
+    local function display(text)
+        tag_popup_widget:set_text(text)
+        tag_popup.screen = t.screen
+        tag_popup.visible = true
+        awful.placement.centered(tag_popup, { parent = t.screen })
+        tag_popup_timer:again()
+    end
+
+    display(get_display_label(t))
+end
+-- }}}
+
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     set_wallpaper(s)
@@ -208,6 +299,18 @@ awful.screen.connect_for_each_screen(function(s)
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
+    -- Persistent tag label widget (shows current tag label next to promptbox)
+    s.mytaglabel = wibox.widget.textbox()
+    local function update_tag_label()
+        local t = s.selected_tag
+        if t and tag_labels[t] then
+            s.mytaglabel:set_text(" " .. tag_labels[t] .. " ")
+        else
+            s.mytaglabel:set_text("")
+        end
+    end
+    tag.connect_signal("property::selected", function() update_tag_label() end)
+    tag.connect_signal("property::name", function() update_tag_label() end)
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox(s)
@@ -220,7 +323,26 @@ awful.screen.connect_for_each_screen(function(s)
     s.mytaglist = awful.widget.taglist {
         screen  = s,
         filter  = awful.widget.taglist.filter.all,
-        buttons = taglist_buttons
+        buttons = taglist_buttons,
+        widget_template = {
+            {
+                {
+                    id     = "text_role",
+                    widget = wibox.widget.textbox,
+                },
+                left   = 6,
+                right  = 6,
+                widget = wibox.container.margin,
+            },
+            id     = "background_role",
+            widget = wibox.container.background,
+            create_callback = function(self, t)
+                self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+            end,
+            update_callback = function(self, t)
+                self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+            end,
+        },
     }
 
     -- Create a tasklist widget
@@ -241,6 +363,7 @@ awful.screen.connect_for_each_screen(function(s)
             mylauncher,
             s.mytaglist,
             s.mypromptbox,
+            s.mytaglabel,
         },
         s.mytasklist, -- Middle widget
         { -- Right widgets
@@ -253,6 +376,8 @@ awful.screen.connect_for_each_screen(function(s)
         },
     }
 end)
+
+load_tag_labels()
 -- }}}
 
 -- {{{ Mouse bindings
@@ -291,6 +416,28 @@ globalkeys = gears.table.join(
               {description = "view previous", group = "tag"}),
     awful.key({ modkey,           }, "Right",  function() awful.tag.viewnext(); focus_client_under_mouse() end,
               {description = "view next", group = "tag"}),
+    awful.key({ modkey, "Shift"  }, "Left",   function()
+        if client.focus then
+            local tag = client.focus.screen.selected_tag
+            local tags = client.focus.screen.tags
+            local idx = tag.index - 1
+            if idx < 1 then idx = #tags end
+            client.focus:move_to_tag(tags[idx])
+        end
+        awful.tag.viewprev()
+        focus_client_under_mouse()
+    end, {description = "move client to previous tag and follow", group = "tag"}),
+    awful.key({ modkey, "Shift"  }, "Right",  function()
+        if client.focus then
+            local tag = client.focus.screen.selected_tag
+            local tags = client.focus.screen.tags
+            local idx = tag.index + 1
+            if idx > #tags then idx = 1 end
+            client.focus:move_to_tag(tags[idx])
+        end
+        awful.tag.viewnext()
+        focus_client_under_mouse()
+    end, {description = "move client to next tag and follow", group = "tag"}),
     awful.key({ modkey,           }, "Escape", function() awful.tag.history.restore(); focus_client_under_mouse() end,
               {description = "go back", group = "tag"}),
 
@@ -330,8 +477,26 @@ globalkeys = gears.table.join(
         {description = "go back", group = "client"}),
 
     -- Standard program
-    awful.key({ modkey,           }, "e", function () awful.spawn(terminal) end,
-              {description = "open a terminal", group = "launcher"}),
+    awful.key({ modkey,           }, "e",
+        function ()
+            local c = client.focus
+            if c and c.pid then
+                awful.spawn.easy_async(
+                    {"sh", "-c", "for pid in $(pgrep -P " .. c.pid .. "); do pty=$(readlink /proc/$pid/fd/0 2>/dev/null); cwd=$(readlink /proc/$pid/cwd 2>/dev/null); if [ -n \"$pty\" ] && [ -n \"$cwd\" ]; then echo \"$(stat -c %X $pty) $cwd\"; fi; done | sort -rn | head -1 | cut -d' ' -f2-"},
+                    function(stdout)
+                        local dir = stdout:match("^%s*(.-)%s*$")
+                        if dir and dir ~= "" then
+                            awful.spawn(terminal .. " --working-directory=" .. dir)
+                        else
+                            awful.spawn(terminal)
+                        end
+                    end
+                )
+            else
+                awful.spawn(terminal)
+            end
+        end,
+        {description = "open a terminal", group = "launcher"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit,
@@ -389,7 +554,28 @@ globalkeys = gears.table.join(
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end,
-              {description = "show the menubar", group = "launcher"})
+              {description = "show the menubar", group = "launcher"}),
+
+    -- Workspace label
+    awful.key({ modkey }, "/",
+              function ()
+                  awful.prompt.run {
+                      prompt       = "Tag label: ",
+                      textbox      = awful.screen.focused().mypromptbox.widget,
+                      exe_callback = function(input)
+                          local t = awful.screen.focused().selected_tag
+                          if not t then return end
+                          if input and input ~= "" then
+                              tag_labels[t] = input
+                          else
+                              tag_labels[t] = nil
+                          end
+                          t:emit_signal("property::name")
+                          save_tag_labels()
+                      end,
+                  }
+              end,
+              {description = "set tag label", group = "tag"})
 )
 
 clientkeys = gears.table.join(
@@ -651,6 +837,12 @@ client.connect_signal("unfocus", function(c)
     c.border_color = beautiful.border_normal
     c.opacity = 0.75
 end)
+
+-- Show popup on tag switch
+tag.connect_signal("property::selected", function(t)
+    if t.selected then show_tag_popup(t) end
+end)
+
 -- }}}
 
 -- Compositor for opacity support
@@ -662,8 +854,7 @@ awful.util.spawn_with_shell('~/.config/awesome/locker.sh')
 awful.util.spawn_with_shell('~/bin/volume-hotkeys.sh')
 
 awesome.connect_signal("exit", function(restart)
-    -- This runs when Awesome quits or reloads
-    -- restart is true if Awesome is restarting (reload), false if quitting completely
+    save_tag_labels()
     awful.spawn.with_shell("pkill -f volume-hotkeys.sh")
 end)
 
