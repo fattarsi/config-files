@@ -18,7 +18,7 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 # oh-my-zsh
 
 # If you come from bash you might have to change your $PATH.
-  export PATH=$HOME/bin:/usr/local/go/bin:$PATH
+  export PATH=$HOME/bin:/usr/local/go/bin:$HOME/go/bin:$PATH
 
 # Path to your oh-my-zsh installation.
   export ZSH="$HOME/.oh-my-zsh"
@@ -150,3 +150,6 @@ export PATH=/home/fattarsi/.opencode/bin:$PATH
 
 # Rig environment variables
 [ -f ~/.config/rig/env.sh ] && source ~/.config/rig/env.sh
+
+# Local config (not tracked by git)
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
