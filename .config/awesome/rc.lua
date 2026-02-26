@@ -114,7 +114,7 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
-beautiful.wallpaper = '/usr/share/xfce4/backdrops/Journey_home_by_Juliette_Taka.png'
+beautiful.wallpaper = '/usr/share/backgrounds/System76-Fractal_Mountains-by_Kate_Hazen_of_System76.png'
 
 -- This is used later as the default terminal and editor to run.
 terminal = "x-terminal-emulator"
@@ -309,8 +309,12 @@ awful.screen.connect_for_each_screen(function(s)
             s.mytaglabel:set_text("")
         end
     end
-    tag.connect_signal("property::selected", function() update_tag_label() end)
-    tag.connect_signal("property::name", function() update_tag_label() end)
+    tag.connect_signal("property::selected", function(t)
+        if t.screen == s then update_tag_label() end
+    end)
+    tag.connect_signal("property::name", function(t)
+        if t.screen == s then update_tag_label() end
+    end)
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox(s)
@@ -843,6 +847,89 @@ tag.connect_signal("property::selected", function(t)
     if t.selected then show_tag_popup(t) end
 end)
 
+-- }}}
+
+-- {{{ Monitor hotplug switching
+do
+    local lgi = require("lgi")
+    local GLib = lgi.GLib
+    local home = os.getenv("HOME")
+    local env_file = home .. "/.cache/monitor-dpi-env"
+    local state_file = home .. "/.cache/monitor-state"
+
+    -- On startup: read cached DPI env so apps launched by awesome inherit correct scaling
+    local f = io.open(env_file, "r")
+    if f then
+        for line in f:lines() do
+            local key, val = line:match("^export%s+(%S+)=(%S+)")
+            if key and val then
+                GLib.setenv(key, val, true)
+            end
+        end
+        f:close()
+    end
+
+    local function handle_monitor_change()
+        -- Check if HDMI-1-0 is connected
+        local handle = io.popen("xrandr | grep 'HDMI-1-0 connected'")
+        local result = handle:read("*a")
+        handle:close()
+
+        local new_state = (result ~= "") and "external" or "laptop"
+
+        -- Compare against cached state to prevent loops after restart
+        local old_state = ""
+        local sf = io.open(state_file, "r")
+        if sf then
+            old_state = sf:read("*a"):gsub("%s+", "")
+            sf:close()
+        end
+
+        if new_state == old_state then return end
+
+        -- Write new state
+        local wf = io.open(state_file, "w")
+        if wf then
+            wf:write(new_state)
+            wf:close()
+        end
+
+        if new_state == "external" then
+            -- LG 4K: HDMI-1-0 at 3840x2160, laptop off
+            awful.spawn.with_shell(
+                "xrandr --output eDP-1 --off --output HDMI-1-0 --mode 3840x2160 --pos 0x0 --rotate normal"
+                .. " && echo 'Xft.dpi: 192' | xrdb -merge"
+                .. " && printf 'export GDK_SCALE=2\\nexport GDK_DPI_SCALE=0.5\\n' > " .. env_file
+            )
+        else
+            -- Laptop only: eDP-1 at 2560x1600
+            awful.spawn.with_shell(
+                "xrandr --output HDMI-1-0 --off --output eDP-1 --auto --mode 2560x1600"
+                .. " && echo 'Xft.dpi: 96' | xrdb -merge"
+                .. " && printf 'export GDK_SCALE=1\\nexport GDK_DPI_SCALE=1\\n' > " .. env_file
+            )
+        end
+
+        -- Restart awesome after delay to re-render widgets at new DPI
+        gears.timer {
+            timeout = 2,
+            single_shot = true,
+            autostart = true,
+            callback = function() awesome.restart() end,
+        }
+    end
+
+    -- Listen for XRandR screen changes (fires on monitor plug/unplug)
+    awesome.connect_signal("screen::change", function()
+        -- Delay to let the kernel/driver settle
+        gears.timer {
+            timeout = 1,
+            single_shot = true,
+            autostart = true,
+            callback = handle_monitor_change,
+        }
+    end)
+end
 -- }}}
 
 -- Compositor for opacity support

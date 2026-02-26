@@ -1,2 +1,6 @@
-export GDK_SCALE=2
-export GDK_DPI_SCALE=0.5
+if [ -f ~/.cache/monitor-dpi-env ]; then
+    . ~/.cache/monitor-dpi-env
+else
+    export GDK_SCALE=2
+    export GDK_DPI_SCALE=0.5
+fi
