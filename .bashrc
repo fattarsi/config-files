@@ -27,12 +27,6 @@ function vim {
     /usr/bin/vim "$@";set_title
 }
 
-# virtualenvwrapper non-lazy load doesn't seem to work
-# do this if not in a venv to load workon tab completion
-if [ -z "$VIRTUAL_ENV" ]; then
-    workon > /dev/null
-fi
-
 
 function parse_git_branch {
     ref=$(/usr/lib/git-core/git-symbolic-ref HEAD 2> /dev/null) || return
@@ -51,16 +45,6 @@ PATH=$PATH:$HOME/.dotnet:$HOME/.dotnet/tools
 alias cd="current_directory"
 alias sl="sl -Fal"
 
-p=`pwd`
-for i in `ls ~/.virtualenvs/*/.project`
-do
-  choice=`cat $i`
-  if [[ "$p" = "$choice"* ]]; then
-    d=`echo $i|rev | cut -c 10- | rev`
-    source $d/bin/activate
-  fi
-done
-
 set_title
 if [ -f ~/.bashrc_local ]; then
     . ~/.bashrc_local
@@ -68,3 +52,7 @@ fi
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
