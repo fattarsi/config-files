@@ -869,24 +869,7 @@ do
         f:close()
     end
 
-    local function handle_monitor_change()
-        -- Check if HDMI-1-0 is connected
-        local handle = io.popen("xrandr | grep 'HDMI-1-0 connected'")
-        local result = handle:read("*a")
-        handle:close()
-
-        local new_state = (result ~= "") and "external" or "laptop"
-
-        -- Compare against cached state to prevent loops after restart
-        local old_state = ""
-        local sf = io.open(state_file, "r")
-        if sf then
-            old_state = sf:read("*a"):gsub("%s+", "")
-            sf:close()
-        end
-
-        if new_state == old_state then return end
-
+    local function apply_monitor_config(new_state)
         -- Write new state
         local wf = io.open(state_file, "w")
         if wf then
@@ -897,36 +880,58 @@ do
         if new_state == "external" then
             -- LG 4K: HDMI-1-0 at 3840x2160, laptop off
             awful.spawn.with_shell(
-                "xrandr --output eDP-1 --off --output HDMI-1-0 --mode 3840x2160 --pos 0x0 --rotate normal"
+                "xrandr --output eDP-2 --off --output HDMI-1-0 --mode 3840x2160 --pos 0x0 --rotate normal"
                 .. " && echo 'Xft.dpi: 192' | xrdb -merge"
                 .. " && printf 'export GDK_SCALE=2\\nexport GDK_DPI_SCALE=0.5\\n' > " .. env_file
             )
         else
-            -- Laptop only: eDP-1 at 2560x1600
+            -- Laptop only: eDP-2 at 2560x1600
             awful.spawn.with_shell(
-                "xrandr --output HDMI-1-0 --off --output eDP-1 --auto --mode 2560x1600"
+                "xrandr --output HDMI-1-0 --off --output eDP-2 --auto --mode 2560x1600"
                 .. " && echo 'Xft.dpi: 96' | xrdb -merge"
                 .. " && printf 'export GDK_SCALE=1\\nexport GDK_DPI_SCALE=1\\n' > " .. env_file
             )
         end
-
-        -- Restart awesome after delay to re-render widgets at new DPI
-        gears.timer {
-            timeout = 2,
-            single_shot = true,
-            autostart = true,
-            callback = function() awesome.restart() end,
-        }
     end
 
-    -- Listen for XRandR screen changes (fires on monitor plug/unplug)
+    local function detect_monitor_state()
+        local handle = io.popen("xrandr | grep 'HDMI-1-0 connected'")
+        local result = handle:read("*a")
+        handle:close()
+        return (result ~= "") and "external" or "laptop"
+    end
+
+    local function read_cached_state()
+        local sf = io.open(state_file, "r")
+        if sf then
+            local s = sf:read("*a"):gsub("%s+", "")
+            sf:close()
+            return s
+        end
+        return ""
+    end
+
+    -- On startup: always apply the correct config
+    apply_monitor_config(detect_monitor_state())
+
+    -- On hotplug: apply only if state actually changed, then restart awesome
     awesome.connect_signal("screen::change", function()
-        -- Delay to let the kernel/driver settle
         gears.timer {
             timeout = 1,
             single_shot = true,
             autostart = true,
-            callback = handle_monitor_change,
+            callback = function()
+                local new_state = detect_monitor_state()
+                if new_state == read_cached_state() then return end
+                apply_monitor_config(new_state)
+                -- Restart awesome after delay to re-render widgets at new DPI
+                gears.timer {
+                    timeout = 2,
+                    single_shot = true,
+                    autostart = true,
+                    callback = function() awesome.restart() end,
+                }
+            end,
         }
     end)
 end
