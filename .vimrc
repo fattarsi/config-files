@@ -24,7 +24,8 @@ call vundle#begin()
 " After updating run `vim +PluginInstall +qall`
 Plugin 'gmarik/Vundle.vim'
 Plugin 'scrooloose/syntastic'
-Plugin 'wincent/command-t'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'eugen0329/vim-esearch'
 Plugin 'tpope/vim-fugitive'
@@ -70,13 +71,7 @@ let g:jedi#use_tabs_not_buffers = 0
 
 let g:pydiction_location='~/.vim/bundle/pydiction/complete-dict'
 
-let g:CommandTMaxHeight=20
-let g:CommandTMatchWindowReverse=0
-let g:CommandTAcceptSelectionMap='<C-o>'
-let g:CommandTAcceptSelectionTabMap='<CR>'
-let g:CommandTTraverseSCM='pwd'
-let g:CommandTFileScanner='find'
-nnoremap \t :KommandT<CR>
+nnoremap \t :Files<CR>
 
 "let g:startify_change_to_dir=0
 "let g:startify_lists = ['files', 'sessions', 'bookmarks']
