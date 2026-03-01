@@ -5,29 +5,35 @@ AUDIO=/tmp/whisper_input.wav
 TEXT=/tmp/whisper_out.txt
 MODEL=~/projects/whisper.cpp/models/ggml-base.en.bin
 WHISPER=~/projects/whisper.cpp/build/bin/whisper-cli
+PIDFILE=/tmp/whisper_rec.pid
 
-# Record 10 seconds max, stop on silence
-echo "Recording..."
-notify-send "Recording..."
-sox -d -r 16000 -c 1 -b 16 $AUDIO \
-  silence 1 0.1 5% 1 2.5 5% trim 0 120
+# Toggle: if already recording, stop and transcribe
+if [ -f "$PIDFILE" ]; then
+    PID=$(cat "$PIDFILE")
+    rm -f "$PIDFILE"
 
-# Transcribe
-echo "Transcribing..."
-notify-send "Transcribing..."
-$WHISPER -m "$MODEL" -f "$AUDIO" --no-timestamps --language en > "$TEXT"
+    # Stop recording (SIGINT so sox writes a valid WAV header)
+    if kill -0 "$PID" 2>/dev/null; then
+        kill -INT "$PID"
+        # Wait for sox to finish writing the WAV header
+        tail --pid="$PID" -f /dev/null 2>/dev/null
+    fi
 
-# Extract text line
-RESULT=$(<"$TEXT")   # or: RESULT=$(cat "$TEXT")
-RESULT="${RESULT#"${RESULT%%[![:space:]]*}"}"  # trim leading whitespace
-RESULT="${RESULT%"${RESULT##*[![:space:]]}"}"  # trim trailing whitespace
+    # Transcribe
+    notify-send "Transcribing..."
+    $WHISPER -m "$MODEL" -f "$AUDIO" --no-timestamps --language en > "$TEXT"
 
-echo "TRANSCRIPTION: $RESULT"
+    # Extract and trim text
+    RESULT=$(<"$TEXT")
+    RESULT="${RESULT#"${RESULT%%[![:space:]]*}"}"
+    RESULT="${RESULT%"${RESULT##*[![:space:]]}"}"
 
-# Copy to clipboard
-echo "Copying to clipboard..."
-printf "%s" "$RESULT" | xclip -selection clipboard
-
-# Paste into focused window
-xdotool key ctrl+v
-
+    # Copy to clipboard and paste
+    printf "%s" "$RESULT" | xclip -selection clipboard
+    xdotool key ctrl+v
+else
+    # Start recording in background
+    notify-send "Recording... (press Super+Shift+S to stop)"
+    setsid sox -t alsa default -r 16000 -c 1 -b 16 "$AUDIO" trim 0 120 &
+    echo $! > "$PIDFILE"
+fi
