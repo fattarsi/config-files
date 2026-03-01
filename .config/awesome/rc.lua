@@ -332,13 +332,15 @@ awful.screen.connect_for_each_screen(function(s)
             {
                 {
                     id     = "text_role",
+                    align  = "center",
                     widget = wibox.widget.textbox,
                 },
-                left   = 6,
-                right  = 6,
+                left   = 12,
+                right  = 12,
                 widget = wibox.container.margin,
             },
             id     = "background_role",
+            forced_width = 48,
             widget = wibox.container.background,
             create_callback = function(self, t)
                 self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
