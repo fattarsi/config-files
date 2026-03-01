@@ -857,6 +857,7 @@ do
     local home = os.getenv("HOME")
     local env_file = home .. "/.cache/monitor-dpi-env"
     local state_file = home .. "/.cache/monitor-state"
+    local client_tags_file = home .. "/.cache/awesome/client-tags"
 
     -- On startup: read cached DPI env so apps launched by awesome inherit correct scaling
     local f = io.open(env_file, "r")
@@ -868,6 +869,61 @@ do
             end
         end
         f:close()
+    end
+
+    -- Save each client's tag indices to a file (X window IDs persist across restart)
+    local function save_client_tags()
+        awful.spawn.with_shell("mkdir -p " .. home .. "/.cache/awesome")
+        local wf = io.open(client_tags_file, "w")
+        if not wf then return end
+        for _, c in ipairs(client.get()) do
+            local tags = c:tags()
+            if #tags > 0 then
+                local indices = {}
+                for _, t in ipairs(tags) do
+                    table.insert(indices, tostring(t.index))
+                end
+                wf:write(c.window .. ":" .. table.concat(indices, ",") .. "\n")
+            end
+        end
+        wf:close()
+    end
+
+    -- Restore client tag assignments after restart
+    local function restore_client_tags()
+        local rf = io.open(client_tags_file, "r")
+        if not rf then return end
+        local mappings = {}
+        for line in rf:lines() do
+            local wid, indices_str = line:match("^(%d+):(.+)$")
+            if wid and indices_str then
+                local indices = {}
+                for idx in indices_str:gmatch("(%d+)") do
+                    table.insert(indices, tonumber(idx))
+                end
+                mappings[tonumber(wid)] = indices
+            end
+        end
+        rf:close()
+        os.remove(client_tags_file)
+
+        local s = awful.screen.focused()
+        if not s then return end
+        for _, c in ipairs(client.get()) do
+            local tag_indices = mappings[c.window]
+            if tag_indices then
+                local tags = {}
+                for _, idx in ipairs(tag_indices) do
+                    if s.tags[idx] then
+                        table.insert(tags, s.tags[idx])
+                    end
+                end
+                if #tags > 0 then
+                    c:tags(tags)
+                    c.screen = s
+                end
+            end
+        end
     end
 
     local function apply_monitor_config(new_state)
@@ -912,10 +968,16 @@ do
         return ""
     end
 
-    -- On startup: always apply the correct config
+    -- On startup: apply correct config, then restore client tags
     apply_monitor_config(detect_monitor_state())
+    gears.timer {
+        timeout = 0.5,
+        single_shot = true,
+        autostart = true,
+        callback = restore_client_tags,
+    }
 
-    -- On hotplug: apply only if state actually changed, then restart awesome
+    -- On hotplug: save client tags, apply config, then restart awesome
     awesome.connect_signal("screen::change", function()
         gears.timer {
             timeout = 1,
@@ -924,6 +986,7 @@ do
             callback = function()
                 local new_state = detect_monitor_state()
                 if new_state == read_cached_state() then return end
+                save_client_tags()
                 apply_monitor_config(new_state)
                 -- Restart awesome after delay to re-render widgets at new DPI
                 gears.timer {
