@@ -443,6 +443,42 @@ globalkeys = gears.table.join(
         awful.tag.viewnext()
         focus_client_under_mouse()
     end, {description = "move client to next tag and follow", group = "tag"}),
+    awful.key({ modkey, "Control" }, "Left", function()
+        local s = awful.screen.focused()
+        local t = s.selected_tag
+        if not t or t.index <= 1 then return end
+        local other = s.tags[t.index - 1]
+        -- Swap clients
+        local t_clients = t:clients()
+        local o_clients = other:clients()
+        for _, c in ipairs(t_clients) do c:move_to_tag(other) end
+        for _, c in ipairs(o_clients) do c:move_to_tag(t) end
+        -- Swap labels
+        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        t:emit_signal("property::name")
+        other:emit_signal("property::name")
+        save_tag_labels()
+        other:view_only()
+        focus_client_under_mouse()
+    end, {description = "swap tag left", group = "tag"}),
+    awful.key({ modkey, "Control" }, "Right", function()
+        local s = awful.screen.focused()
+        local t = s.selected_tag
+        if not t or t.index >= #s.tags then return end
+        local other = s.tags[t.index + 1]
+        -- Swap clients
+        local t_clients = t:clients()
+        local o_clients = other:clients()
+        for _, c in ipairs(t_clients) do c:move_to_tag(other) end
+        for _, c in ipairs(o_clients) do c:move_to_tag(t) end
+        -- Swap labels
+        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        t:emit_signal("property::name")
+        other:emit_signal("property::name")
+        save_tag_labels()
+        other:view_only()
+        focus_client_under_mouse()
+    end, {description = "swap tag right", group = "tag"}),
     awful.key({ modkey,           }, "Escape", function() awful.tag.history.restore(); focus_client_under_mouse() end,
               {description = "go back", group = "tag"}),
 
