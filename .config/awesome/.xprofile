@@ -1,6 +1,25 @@
-if [ -f ~/.cache/monitor-dpi-env ]; then
-    . ~/.cache/monitor-dpi-env
-else
+# Detect and apply monitor config BEFORE the window manager starts.
+# This ensures the correct display is active from the very beginning of the session.
+# Dynamically find the connected HDMI and eDP outputs (connector names can change).
+HDMI_OUT=$(xrandr | grep -oP 'HDMI-\S+ connected' | head -1 | awk '{print $1}')
+EDP_OUT=$(xrandr | grep -oP 'eDP-\S+ connected' | head -1 | awk '{print $1}')
+
+if [ -n "$HDMI_OUT" ]; then
+    xrandr --output "${EDP_OUT:-eDP-1}" --off --output "$HDMI_OUT" --mode 3840x2160 --pos 0x0 --rotate normal
+    echo 'Xft.dpi: 192' | xrdb -merge
     export GDK_SCALE=2
     export GDK_DPI_SCALE=0.5
+    printf 'export GDK_SCALE=2\nexport GDK_DPI_SCALE=0.5\n' > ~/.cache/monitor-dpi-env
+    echo 'external' > ~/.cache/monitor-state
+    echo "$HDMI_OUT" > ~/.cache/monitor-hdmi-name
+    echo "${EDP_OUT:-eDP-1}" > ~/.cache/monitor-edp-name
+else
+    xrandr --output "${EDP_OUT:-eDP-1}" --auto --mode 2560x1600
+    echo 'Xft.dpi: 96' | xrdb -merge
+    export GDK_SCALE=1
+    export GDK_DPI_SCALE=1
+    printf 'export GDK_SCALE=1\nexport GDK_DPI_SCALE=1\n' > ~/.cache/monitor-dpi-env
+    echo 'laptop' > ~/.cache/monitor-state
+    echo "${EDP_OUT:-eDP-1}" > ~/.cache/monitor-edp-name
 fi
+export ELECTRON_FORCE_DEVICE_SCALE_FACTOR=1
