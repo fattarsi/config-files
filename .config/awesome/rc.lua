@@ -114,7 +114,40 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
-beautiful.wallpaper = '/usr/share/backgrounds/System76-Fractal_Mountains-by_Kate_Hazen_of_System76.png'
+-- {{{ Random wallpaper rotation
+math.randomseed(os.time())
+local wallpaper_dir = '/usr/share/backgrounds/'
+local function get_wallpapers()
+    local wallpapers = {}
+    local p = io.popen('find "' .. wallpaper_dir .. '" -maxdepth 1 -type f \\( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \\)'
+        .. ' | grep -v -i -e "^.*/ubuntu" -e "Brandmark" -e "Unleash_Your_Robot"')
+    if p then
+        for file in p:lines() do
+            table.insert(wallpapers, file)
+        end
+        p:close()
+    end
+    return wallpapers
+end
+
+local function pick_random_wallpaper()
+    local wallpapers = get_wallpapers()
+    if #wallpapers > 0 then
+        beautiful.wallpaper = wallpapers[math.random(#wallpapers)]
+        for s in screen do
+            gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+        end
+    end
+end
+
+pick_random_wallpaper()
+
+gears.timer {
+    timeout     = 5 * 60 * 60, -- 5 hours
+    autostart   = true,
+    callback    = pick_random_wallpaper,
+}
+-- }}}
 
 -- This is used later as the default terminal and editor to run.
 terminal = "gnome-terminal --profile=main"
@@ -540,6 +573,8 @@ globalkeys = gears.table.join(
         {description = "open a terminal", group = "launcher"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
               {description = "reload awesome", group = "awesome"}),
+    awful.key({ modkey, "Shift"   }, "w", pick_random_wallpaper,
+              {description = "random wallpaper", group = "awesome"}),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
 
