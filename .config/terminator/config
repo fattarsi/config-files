@@ -1,13 +1,10 @@
 [global_config]
   focus = mouse
-  title_transmit_fg_color = "#000000"
-  title_transmit_bg_color = "#deddda"
-  title_inactive_bg_color = "#77767b"
-  title_use_system_font = False
-  title_font = DejaVu Sans Mono 7
 [keybindings]
   go_next = ""
   close_term = <Primary>w
+  copy = <Primary>c
+  paste = <Primary>v
   next_tab = <Shift>Right
   prev_tab = <Shift>Left
   new_window = <Primary><Shift>n
@@ -16,9 +13,9 @@
     icon_bell = False
     background_darkness = 0.93
     background_type = transparent
-    cursor_color = "#aaaaaa"
     font = DejaVu Sans Mono 10
     show_titlebar = False
+    scrollback_lines = 10000
     use_system_font = False
 [layouts]
   [[default]]

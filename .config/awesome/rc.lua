@@ -117,7 +117,7 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 beautiful.wallpaper = '/usr/share/backgrounds/System76-Fractal_Mountains-by_Kate_Hazen_of_System76.png'
 
 -- This is used later as the default terminal and editor to run.
-terminal = "x-terminal-emulator"
+terminal = "gnome-terminal --profile=main"
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -630,8 +630,11 @@ clientkeys = gears.table.join(
               {description = "close", group = "client"}),
     awful.key({ modkey, "Control" }, "space",  awful.client.floating.toggle                     ,
               {description = "toggle floating", group = "client"}),
-    awful.key({ modkey }, "Return", function (c) c:swap(awful.client.getmaster()) end,
-              {description = "move to master", group = "client"}),
+    awful.key({ modkey }, "Return", function (c)
+            c.maximized = not c.maximized
+            c:raise()
+        end,
+              {description = "(un)maximize", group = "client"}),
     awful.key({ modkey,           }, "o",      function (c) c:move_to_screen()               end,
               {description = "move to screen", group = "client"}),
     awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
@@ -643,12 +646,8 @@ clientkeys = gears.table.join(
             c.minimized = true
         end ,
         {description = "minimize", group = "client"}),
-    awful.key({ modkey,           }, "m",
-        function (c)
-            c.maximized = not c.maximized
-            c:raise()
-        end ,
-        {description = "(un)maximize", group = "client"}),
+    awful.key({ modkey,           }, "m", function (c) c:swap(awful.client.getmaster()) end,
+        {description = "move to master", group = "client"}),
     awful.key({ modkey, "Control" }, "m",
         function (c)
             c.maximized_vertical = not c.maximized_vertical
@@ -787,8 +786,8 @@ awful.rules.rules = {
 
     -- Set terminal to be slave
     {
-        rule = { class = 'x-terminal-emulator'},
-        properties = { slave = true }
+        rule_any = { class = {'x-terminal-emulator', 'Gnome-terminal'} },
+        properties = { slave = true, size_hints_honor = false }
     },
     -- Floating and centered xfce4-appfinder
     {
@@ -813,7 +812,7 @@ client.connect_signal("manage", function (c)
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
-    if not awesome.startup and c.class == "X-terminal-emulator" then
+    if not awesome.startup and (c.class == "X-terminal-emulator" or c.class == "Gnome-terminal") then
         awful.client.setslave(c)
     end
 
