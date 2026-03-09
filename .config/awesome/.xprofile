@@ -6,6 +6,8 @@ EDP_OUT=$(xrandr | grep -oP 'eDP-\S+ connected' | head -1 | awk '{print $1}')
 
 if [ -n "$HDMI_OUT" ]; then
     xrandr --output "${EDP_OUT:-eDP-1}" --off --output "$HDMI_OUT" --mode 3840x2160 --pos 0x0 --rotate normal
+    # Enable NVIDIA vsync at driver level (avoids terminal input lag from picom vsync)
+    nvidia-settings --assign CurrentMetaMode="DPY-0: nvidia-auto-select @3840x2160 +0+0 {ViewPortIn=3840x2160, ViewPortOut=3840x2160+0+0, ForceFullCompositionPipeline=On}" > /dev/null 2>&1
     echo 'Xft.dpi: 192' | xrdb -merge
     export GDK_SCALE=2
     export GDK_DPI_SCALE=0.5
