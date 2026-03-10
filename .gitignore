@@ -40,6 +40,8 @@
 .config/awesome/*
 !.config/awesome/rc.lua
 !.config/awesome/battery.lua
+!.config/awesome/sysmon.lua
+!.config/awesome/calendar.lua
 !.config/awesome/locker.sh
 !.config/awesome/.xprofile
 !.config/awesome/.Xresources

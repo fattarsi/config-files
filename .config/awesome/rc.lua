@@ -9,6 +9,8 @@ require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
 local battery = require("battery")
+local sysmon = require("sysmon")
+local calendar = require("calendar")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -224,6 +226,9 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 -- {{{ Wibar
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock()
+mytextclock:buttons(gears.table.join(
+    awful.button({}, 1, function() calendar.toggle() end)
+))
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -407,6 +412,9 @@ awful.screen.connect_for_each_screen(function(s)
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
+            sysmon.cpu,
+            sysmon.mem,
+            sysmon.net,
             wibox.widget.systray(),
             battery,
             mytextclock,
@@ -1062,6 +1070,9 @@ end
 
 -- Compositor for opacity support
 awful.util.spawn_with_shell('picom --daemon')
+
+-- NetworkManager applet (WiFi selector in systray)
+awful.util.spawn_with_shell('pgrep -x nm-applet || nm-applet')
 
 -- Lock screen script
 awful.util.spawn_with_shell('xset +dpms && xset dpms 720 720 720')
