@@ -30,6 +30,11 @@
 !.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml
 !.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 
+# Kitty
+!.config/kitty
+.config/kitty/*
+!.config/kitty/kitty.conf
+
 # Awesome WM
 !.config/awesome
 .config/awesome/*

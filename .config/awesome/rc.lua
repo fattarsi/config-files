@@ -150,7 +150,7 @@ gears.timer {
 -- }}}
 
 -- This is used later as the default terminal and editor to run.
-terminal = "gnome-terminal --profile=main"
+terminal = "kitty"
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -560,7 +560,7 @@ globalkeys = gears.table.join(
                     function(stdout)
                         local dir = stdout:match("^%s*(.-)%s*$")
                         if dir and dir ~= "" then
-                            awful.spawn(terminal .. " --working-directory=" .. dir)
+                            awful.spawn(terminal .. " --directory=" .. dir)
                         else
                             awful.spawn(terminal)
                         end
@@ -821,7 +821,7 @@ awful.rules.rules = {
 
     -- Set terminal to be slave
     {
-        rule_any = { class = {'x-terminal-emulator', 'Gnome-terminal'} },
+        rule_any = { class = {'x-terminal-emulator', 'Gnome-terminal', 'kitty'} },
         properties = { slave = true, size_hints_honor = false }
     },
     -- Floating and centered xfce4-appfinder
@@ -847,7 +847,7 @@ client.connect_signal("manage", function (c)
     -- Set the windows at the slave,
     -- i.e. put it at the end of others instead of setting it master.
     -- if not awesome.startup then awful.client.setslave(c) end
-    if not awesome.startup and (c.class == "X-terminal-emulator" or c.class == "Gnome-terminal") then
+    if not awesome.startup and (c.class == "X-terminal-emulator" or c.class == "Gnome-terminal" or c.class == "kitty") then
         awful.client.setslave(c)
     end
 
