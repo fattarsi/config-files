@@ -88,7 +88,6 @@ plugins=(
   docker
   git
   kubectl
-  zsh-z
 )
 
 #source $ZSH/oh-my-zsh.sh
@@ -150,6 +149,16 @@ export PATH=/home/fattarsi/.opencode/bin:$PATH
 
 # Rig environment variables
 [ -f ~/.config/rig/env.sh ] && source ~/.config/rig/env.sh
+
+# yazi shell wrapper (enables directory changing with z, etc.)
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
 
 # Local config (not tracked by git)
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
