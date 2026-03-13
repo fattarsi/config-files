@@ -61,8 +61,7 @@ local function build_calendar(month_offset)
         end
         table.insert(row, w)
 
-        if (#row - 1) % 7 == 0 or day == days_in then  -- -1 for layout key
-            -- Actually count real children
+        if #row % 7 == 0 or day == days_in then
             local count = #row
             -- Pad remaining days
             while count < 7 do

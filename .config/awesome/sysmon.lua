@@ -6,8 +6,19 @@ local sysmon = {}
 
 -- CPU
 sysmon.cpu = wibox.widget.textbox()
-vicious.register(sysmon.cpu, vicious.widgets.cpu, " $1% ", 3)
-awful.tooltip({ objects = {sysmon.cpu}, text = "CPU usage" })
+local cpu_tooltip = awful.tooltip({ objects = {sysmon.cpu} })
+vicious.register(sysmon.cpu, vicious.widgets.cpu, function(widget, args)
+    awful.spawn.easy_async(
+        {"sh", "-c", "ps -eo comm,%cpu --sort=-%cpu --no-headers | head -1"},
+        function(stdout)
+            local name, pct = stdout:match("^(%S+)%s+(%S+)")
+            if name then
+                cpu_tooltip:set_text(name .. " " .. pct .. "%")
+            end
+        end
+    )
+    return " " .. args[1] .. "% "
+end, 3)
 
 -- Memory
 sysmon.mem = wibox.widget.textbox()
@@ -31,23 +42,19 @@ local function format_bytes(bytes)
     end
 end
 
-local net_ifaces = {}
-for iface in io.popen("ls /sys/class/net/"):lines() do
-    if iface ~= "lo" then
-        table.insert(net_ifaces, iface)
-    end
-end
-
 vicious.register(net_widget, vicious.widgets.net,
     function(widget, args)
         local down, up = 0, 0
         local active_iface = "none"
-        for _, iface in ipairs(net_ifaces) do
-            local d = args["{" .. iface .. " down_b}"] or 0
-            local u = args["{" .. iface .. " up_b}"] or 0
-            if d + u > down + up then
-                down, up = d, u
-                active_iface = iface
+        for key, val in pairs(args) do
+            local iface = key:match("^{(.+) down_b}$")
+            if iface and iface ~= "lo" then
+                local d = tonumber(val) or 0
+                local u = tonumber(args["{" .. iface .. " up_b}"] or 0) or 0
+                if d + u > down + up then
+                    down, up = d, u
+                    active_iface = iface
+                end
             end
         end
         net_tooltip:set_text("Network: " .. active_iface)

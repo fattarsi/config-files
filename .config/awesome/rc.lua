@@ -879,6 +879,22 @@ do
         f:close()
     end
 
+    local selected_tag_file = home .. "/.cache/awesome/selected-tag"
+
+    local function save_selected_tag()
+        local s = awful.screen.focused()
+        if s then
+            local t = s.selected_tag
+            if t then
+                local f = io.open(selected_tag_file, "w")
+                if f then
+                    f:write(tostring(t.index))
+                    f:close()
+                end
+            end
+        end
+    end
+
     -- Save each client's tag indices to a file (X window IDs persist across restart)
     local function save_client_tags()
         awful.spawn.with_shell("mkdir -p " .. home .. "/.cache/awesome")
@@ -942,6 +958,14 @@ do
         return result
     end
 
+    -- Find any output matching pattern (connected or disconnected) that still has a mode set
+    local function find_any_output(pattern)
+        local handle = io.popen("xrandr | grep -oP '" .. pattern .. "\\S+(?= (?:connected|disconnected))' | head -1")
+        local result = handle:read("*a"):gsub("%s+", "")
+        handle:close()
+        return result
+    end
+
     local function apply_monitor_config(new_state)
         local hdmi_out = find_output("HDMI-")
         local edp_out = find_output("eDP-")
@@ -961,14 +985,19 @@ do
                 .. " && echo 'Xft.dpi: 192' | xrdb -merge"
                 .. " && printf 'export GDK_SCALE=2\\nexport GDK_DPI_SCALE=0.5\\n' > " .. env_file
             )
+            awful.spawn.with_shell("echo 10.0 > " .. home .. "/.cache/kitty-font-size"
+                .. "; for s in /tmp/kitty-*; do kitty @ --to=unix:$s set-font-size 10.0 2>/dev/null; done")
         else
-            -- Laptop only
-            local off_cmd = hdmi_out ~= "" and ("xrandr --output " .. hdmi_out .. " --off --output " .. edp_out .. " --auto --mode 2560x1600") or ("xrandr --output " .. edp_out .. " --auto --mode 2560x1600")
+            -- Laptop only — find HDMI output even if disconnected (NVIDIA may leave ghost mode)
+            local hdmi_any = hdmi_out ~= "" and hdmi_out or find_any_output("HDMI-")
+            local off_cmd = hdmi_any ~= "" and ("xrandr --output " .. hdmi_any .. " --off --output " .. edp_out .. " --auto --mode 2560x1600") or ("xrandr --output " .. edp_out .. " --auto --mode 2560x1600")
             awful.spawn.with_shell(
                 off_cmd
                 .. " && echo 'Xft.dpi: 96' | xrdb -merge"
                 .. " && printf 'export GDK_SCALE=1\\nexport GDK_DPI_SCALE=1\\n' > " .. env_file
             )
+            awful.spawn.with_shell("echo 15.0 > " .. home .. "/.cache/kitty-font-size"
+                .. "; for s in /tmp/kitty-*; do kitty @ --to=unix:$s set-font-size 15.0 2>/dev/null; done")
         end
     end
 
@@ -987,13 +1016,29 @@ do
         return ""
     end
 
-    -- On startup: apply correct config, then restore client tags
+    -- On startup: apply correct config, then restore client tags and selected tag
     apply_monitor_config(detect_monitor_state())
     gears.timer {
         timeout = 0.5,
         single_shot = true,
         autostart = true,
-        callback = restore_client_tags,
+        callback = function()
+            restore_client_tags()
+            -- Restore the tag that was selected before restart
+            local tag_file = home .. "/.cache/awesome/selected-tag"
+            local tf = io.open(tag_file, "r")
+            if tf then
+                local idx = tonumber(tf:read("*a"))
+                tf:close()
+                os.remove(tag_file)
+                if idx then
+                    local s = awful.screen.focused()
+                    if s and s.tags[idx] then
+                        s.tags[idx]:view_only()
+                    end
+                end
+            end
+        end,
     }
 
     -- Debounced hotplug: single timer that resets on each signal
@@ -1021,6 +1066,7 @@ do
 
         -- State changed — apply it
         save_client_tags()
+        save_selected_tag()
         apply_monitor_config(new_state)
 
         -- Verify xrandr applied correctly before restarting
@@ -1065,6 +1111,18 @@ do
             callback = handle_hotplug,
         }
     end)
+
+    -- Poll for monitor changes as a fallback (NVIDIA drivers may not emit screen::change)
+    gears.timer {
+        timeout = 3,
+        autostart = true,
+        callback = function()
+            local new_state = detect_monitor_state()
+            if new_state ~= read_cached_state() then
+                handle_hotplug()
+            end
+        end,
+    }
 end
 -- }}}
 
@@ -1081,6 +1139,9 @@ awful.util.spawn_with_shell('~/bin/volume-hotkeys.sh')
 
 awesome.connect_signal("exit", function(restart)
     save_tag_labels()
+    if restart then
+        save_selected_tag()
+    end
     awful.spawn.with_shell("pkill -f volume-hotkeys.sh")
 end)
 

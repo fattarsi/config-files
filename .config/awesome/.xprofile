@@ -7,11 +7,14 @@ EDP_OUT=$(xrandr | grep -oP 'eDP-\S+ connected' | head -1 | awk '{print $1}')
 if [ -n "$HDMI_OUT" ]; then
     xrandr --output "${EDP_OUT:-eDP-1}" --off --output "$HDMI_OUT" --mode 3840x2160 --pos 0x0 --rotate normal
     # Enable NVIDIA vsync at driver level (avoids terminal input lag from picom vsync)
-    nvidia-settings --assign CurrentMetaMode="DPY-0: nvidia-auto-select @3840x2160 +0+0 {ViewPortIn=3840x2160, ViewPortOut=3840x2160+0+0, ForceFullCompositionPipeline=On}" > /dev/null 2>&1
+    if command -v system76-power > /dev/null 2>&1 && [ "$(system76-power graphics)" = "nvidia" ]; then
+        nvidia-settings --assign CurrentMetaMode="DPY-0: nvidia-auto-select @3840x2160 +0+0 {ViewPortIn=3840x2160, ViewPortOut=3840x2160+0+0, ForceFullCompositionPipeline=On}" > /dev/null 2>&1
+    fi
     echo 'Xft.dpi: 192' | xrdb -merge
     export GDK_SCALE=2
     export GDK_DPI_SCALE=0.5
     printf 'export GDK_SCALE=2\nexport GDK_DPI_SCALE=0.5\n' > ~/.cache/monitor-dpi-env
+    echo 10.0 > ~/.cache/kitty-font-size
     echo 'external' > ~/.cache/monitor-state
     echo "$HDMI_OUT" > ~/.cache/monitor-hdmi-name
     echo "${EDP_OUT:-eDP-1}" > ~/.cache/monitor-edp-name
@@ -21,7 +24,11 @@ else
     export GDK_SCALE=1
     export GDK_DPI_SCALE=1
     printf 'export GDK_SCALE=1\nexport GDK_DPI_SCALE=1\n' > ~/.cache/monitor-dpi-env
+    echo 15.0 > ~/.cache/kitty-font-size
     echo 'laptop' > ~/.cache/monitor-state
     echo "${EDP_OUT:-eDP-1}" > ~/.cache/monitor-edp-name
 fi
 export ELECTRON_FORCE_DEVICE_SCALE_FACTOR=1
+
+# Enable tap-to-click on touchpad
+xinput set-prop "ELAN0412:01 04F3:32EE Touchpad" "libinput Tapping Enabled" 1
