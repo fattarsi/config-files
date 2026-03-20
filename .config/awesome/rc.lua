@@ -165,7 +165,7 @@ math.randomseed(os.time())
 local wallpaper_dir = '/usr/share/backgrounds/'
 local function get_wallpapers()
     local wallpapers = {}
-    local p = io.popen('find "' .. wallpaper_dir .. '" -maxdepth 1 -type f \\( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \\)'
+    local p = io.popen('find "' .. wallpaper_dir .. '" -type f \\( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \\)'
         .. ' | grep -v -i -e "^.*/ubuntu" -e "Brandmark" -e "Unleash_Your_Robot"')
     if p then
         for file in p:lines() do
@@ -1055,6 +1055,21 @@ end)
 
 -- }}}
 
+local function save_selected_tag()
+    local s = awful.screen.focused()
+    if s then
+        local t = s.selected_tag
+        if t then
+            awful.spawn.with_shell("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
+            local f = io.open(os.getenv("HOME") .. "/.cache/awesome/selected-tag", "w")
+            if f then
+                f:write(tostring(t.index))
+                f:close()
+            end
+        end
+    end
+end
+
 -- {{{ Monitor hotplug switching
 do
     local lgi = require("lgi")
@@ -1074,22 +1089,6 @@ do
             end
         end
         f:close()
-    end
-
-    local selected_tag_file = home .. "/.cache/awesome/selected-tag"
-
-    local function save_selected_tag()
-        local s = awful.screen.focused()
-        if s then
-            local t = s.selected_tag
-            if t then
-                local f = io.open(selected_tag_file, "w")
-                if f then
-                    f:write(tostring(t.index))
-                    f:close()
-                end
-            end
-        end
     end
 
     -- Save each client's tag indices to a file (X window IDs persist across restart)
@@ -1309,12 +1308,20 @@ do
         }
     end)
 
-    -- Poll for monitor changes as a fallback (NVIDIA drivers may not emit screen::change)
+    -- Poll for monitor changes via sysfs (lightweight file read, no GPU driver query)
+    -- NVIDIA drivers may not emit screen::change, so poll as a fallback
     gears.timer {
         timeout = 3,
         autostart = true,
         callback = function()
-            local new_state = detect_monitor_state()
+            local hdmi_connected = false
+            for path in io.popen("cat /sys/class/drm/card*-HDMI-*/status 2>/dev/null"):lines() do
+                if path == "connected" then
+                    hdmi_connected = true
+                    break
+                end
+            end
+            local new_state = hdmi_connected and "external" or "laptop"
             if new_state ~= read_cached_state() then
                 handle_hotplug()
             end
