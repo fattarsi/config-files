@@ -333,7 +333,8 @@ awful.screen.connect_for_each_screen(function(s)
     set_wallpaper(s)
 
     -- Each screen has its own tag table.
-    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+    awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                "11", "12", "13", "14", "15", "16", "17", "18", "19", "20" }, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
@@ -361,32 +362,47 @@ awful.screen.connect_for_each_screen(function(s)
                            awful.button({ }, 3, function () awful.layout.inc(-1) end),
                            awful.button({ }, 4, function () awful.layout.inc( 1) end),
                            awful.button({ }, 5, function () awful.layout.inc(-1) end)))
-    -- Create a taglist widget
-    s.mytaglist = awful.widget.taglist {
-        screen  = s,
-        filter  = awful.widget.taglist.filter.all,
-        buttons = taglist_buttons,
-        widget_template = {
+    -- Create taglist widgets (2 rows of 10)
+    local taglist_template = {
+        {
             {
-                {
-                    id     = "text_role",
-                    align  = "center",
-                    widget = wibox.widget.textbox,
-                },
-                left   = 12,
-                right  = 12,
-                widget = wibox.container.margin,
+                id     = "text_role",
+                align  = "center",
+                widget = wibox.widget.textbox,
             },
-            id     = "background_role",
-            forced_width = 48,
-            widget = wibox.container.background,
-            create_callback = function(self, t)
-                self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
-            end,
-            update_callback = function(self, t)
-                self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
-            end,
+            left   = 6,
+            right  = 6,
+            widget = wibox.container.margin,
         },
+        id     = "background_role",
+        forced_width = 36,
+        widget = wibox.container.background,
+        create_callback = function(self, t)
+            self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+        end,
+        update_callback = function(self, t)
+            self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+        end,
+    }
+
+    s.mytaglist_top = awful.widget.taglist {
+        screen  = s,
+        filter  = function(t) return t.index <= 10 end,
+        buttons = taglist_buttons,
+        widget_template = taglist_template,
+    }
+
+    s.mytaglist_bottom = awful.widget.taglist {
+        screen  = s,
+        filter  = function(t) return t.index > 10 end,
+        buttons = taglist_buttons,
+        widget_template = taglist_template,
+    }
+
+    s.mytaglist = wibox.widget {
+        s.mytaglist_top,
+        s.mytaglist_bottom,
+        layout = wibox.layout.fixed.vertical,
     }
 
     -- Create a tasklist widget
@@ -397,7 +413,7 @@ awful.screen.connect_for_each_screen(function(s)
     }
 
     -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s })
+    s.mywibox = awful.wibar({ position = "top", screen = s, height = 58 })
 
     -- Add widgets to the wibox
     s.mywibox:setup {
@@ -464,6 +480,26 @@ globalkeys = gears.table.join(
               {description = "previous workspace", group = "workspaces"}),
     awful.key({ modkey,           }, "Right",  function() awful.tag.viewnext(); focus_client_under_mouse() end,
               {description = "next workspace", group = "workspaces"}),
+    awful.key({ modkey,           }, "Up", function()
+        local s = awful.screen.focused()
+        local t = s.selected_tag
+        if not t then return end
+        local idx = t.index - 10
+        if idx >= 1 and s.tags[idx] then
+            s.tags[idx]:view_only()
+            focus_client_under_mouse()
+        end
+    end, {description = "workspace row up", group = "workspaces"}),
+    awful.key({ modkey,           }, "Down", function()
+        local s = awful.screen.focused()
+        local t = s.selected_tag
+        if not t then return end
+        local idx = t.index + 10
+        if idx <= #s.tags and s.tags[idx] then
+            s.tags[idx]:view_only()
+            focus_client_under_mouse()
+        end
+    end, {description = "workspace row down", group = "workspaces"}),
     awful.key({ modkey, "Shift"  }, "Left",   function()
         if client.focus then
             local tag = client.focus.screen.selected_tag
@@ -486,6 +522,32 @@ globalkeys = gears.table.join(
         awful.tag.viewnext()
         focus_client_under_mouse()
     end, {description = "move app right", group = "workspaces"}),
+    awful.key({ modkey, "Shift"  }, "Up", function()
+        if client.focus then
+            local s = client.focus.screen
+            local t = s.selected_tag
+            if not t then return end
+            local idx = t.index - 10
+            if idx >= 1 and s.tags[idx] then
+                client.focus:move_to_tag(s.tags[idx])
+                s.tags[idx]:view_only()
+                focus_client_under_mouse()
+            end
+        end
+    end, {description = "move app row up", group = "workspaces"}),
+    awful.key({ modkey, "Shift"  }, "Down", function()
+        if client.focus then
+            local s = client.focus.screen
+            local t = s.selected_tag
+            if not t then return end
+            local idx = t.index + 10
+            if idx <= #s.tags and s.tags[idx] then
+                client.focus:move_to_tag(s.tags[idx])
+                s.tags[idx]:view_only()
+                focus_client_under_mouse()
+            end
+        end
+    end, {description = "move app row down", group = "workspaces"}),
     awful.key({ modkey, "Control" }, "Left", function()
         local s = awful.screen.focused()
         local t = s.selected_tag
@@ -518,6 +580,42 @@ globalkeys = gears.table.join(
         other:view_only()
         focus_client_under_mouse()
     end, {description = "swap workspace right", group = "workspaces"}),
+    awful.key({ modkey, "Control" }, "Up", function()
+        local s = awful.screen.focused()
+        local t = s.selected_tag
+        if not t then return end
+        local idx = t.index - 10
+        if idx < 1 or not s.tags[idx] then return end
+        local other = s.tags[idx]
+        local t_clients = t:clients()
+        local o_clients = other:clients()
+        for _, c in ipairs(t_clients) do c:move_to_tag(other) end
+        for _, c in ipairs(o_clients) do c:move_to_tag(t) end
+        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        t:emit_signal("property::name")
+        other:emit_signal("property::name")
+        save_tag_labels()
+        other:view_only()
+        focus_client_under_mouse()
+    end, {description = "swap workspace row up", group = "workspaces"}),
+    awful.key({ modkey, "Control" }, "Down", function()
+        local s = awful.screen.focused()
+        local t = s.selected_tag
+        if not t then return end
+        local idx = t.index + 10
+        if idx > #s.tags or not s.tags[idx] then return end
+        local other = s.tags[idx]
+        local t_clients = t:clients()
+        local o_clients = other:clients()
+        for _, c in ipairs(t_clients) do c:move_to_tag(other) end
+        for _, c in ipairs(o_clients) do c:move_to_tag(t) end
+        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        t:emit_signal("property::name")
+        other:emit_signal("property::name")
+        save_tag_labels()
+        other:view_only()
+        focus_client_under_mouse()
+    end, {description = "swap workspace row down", group = "workspaces"}),
     awful.key({ modkey,           }, "Escape", function() awful.tag.history.restore(); focus_client_under_mouse() end,
               {description = "last workspace", group = "workspaces"}),
     awful.key({ modkey }, "/",
@@ -661,7 +759,7 @@ clientkeys = gears.table.join(
 -- Bind all key numbers to tags.
 -- Be careful: we use keycodes to make it work on any keyboard layout.
 -- This should map on the top row of your keyboard, usually 1 to 9.
-for i = 1, 9 do
+for i = 1, 10 do
     globalkeys = gears.table.join(globalkeys,
         -- View tag only.
         awful.key({ modkey }, "#" .. i + 9,
