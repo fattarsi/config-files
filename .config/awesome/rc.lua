@@ -659,10 +659,16 @@ globalkeys = gears.table.join(
               {description = "jump to urgent window", group = "windows"}),
     awful.key({ modkey,           }, "Tab",
         function ()
-            awful.client.focus.history.previous()
-            if client.focus then
-                client.focus:raise()
-            end
+            sloppy_suppressed = true
+            awful.client.focus.byidx(1)
+            gears.timer.start_new(0.3, function() sloppy_suppressed = false end)
+        end,
+        {description = "next window", group = "windows"}),
+    awful.key({ modkey, "Shift"  }, "Tab",
+        function ()
+            sloppy_suppressed = true
+            awful.client.focus.byidx(-1)
+            gears.timer.start_new(0.3, function() sloppy_suppressed = false end)
         end,
         {description = "previous window", group = "windows"}),
     awful.key({ modkey, "Control" }, "n",
@@ -935,10 +941,29 @@ client.connect_signal("request::titlebars", function(c)
     }
 end)
 
--- Enable sloppy focus, so that focus follows mouse.
-client.connect_signal("mouse::enter", function(c)
-    c:emit_signal("request::activate", "mouse_enter", {raise = false})
+-- Enable sloppy focus, so that focus follows mouse (debounced).
+-- sloppy_suppressed is set briefly after keyboard-driven focus changes
+-- to prevent mouse::enter from immediately stealing focus back.
+local sloppy_suppressed = false
+local focus_timer = gears.timer { timeout = 0.05, single_shot = true }
+local focus_pending = nil
+focus_timer:connect_signal("timeout", function()
+    if focus_pending and focus_pending.valid and not sloppy_suppressed then
+        focus_pending:emit_signal("request::activate", "mouse_enter", {raise = false})
+    end
+    focus_pending = nil
 end)
+client.connect_signal("mouse::enter", function(c)
+    if sloppy_suppressed then return end
+    focus_pending = c
+    focus_timer:again()
+end)
+
+-- Re-check focus when a client disappears or the layout shifts,
+-- so the window under a stationary mouse gets focused.
+client.connect_signal("unmanage", function() focus_client_under_mouse() end)
+client.connect_signal("property::minimized", function() focus_client_under_mouse() end)
+awful.tag.attached_connect_signal(nil, "property::layout", function() focus_client_under_mouse() end)
 
 client.connect_signal("focus", function(c)
     c.border_color = beautiful.border_focus
