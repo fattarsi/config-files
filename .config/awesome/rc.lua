@@ -43,8 +43,11 @@ end
 
 -- {{{ Workspace labels
 tag_labels = {}      -- manual labels keyed by tag object (global for awesome-client access)
+tag_colors = {}      -- per-tag background colors keyed by tag object
+local tag_color_palette = { "none", "#cc3333", "#3366cc", "#33aa55" }
 
 local tag_labels_path = os.getenv("HOME") .. "/.cache/awesome/tag_labels"
+local tag_colors_path = os.getenv("HOME") .. "/.cache/awesome/tag_colors"
 
 local function save_tag_labels()
     os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
@@ -69,6 +72,47 @@ local function load_tag_labels()
                 local t = s.tags[tonumber(ti)]
                 if t then
                     tag_labels[t] = label
+                    t:emit_signal("property::name")
+                end
+            end
+        end
+    end
+    f:close()
+end
+
+local function lighten_color(hex, amount)
+    local r = tonumber(hex:sub(2, 3), 16)
+    local g = tonumber(hex:sub(4, 5), 16)
+    local b = tonumber(hex:sub(6, 7), 16)
+    r = math.floor(r + (255 - r) * amount)
+    g = math.floor(g + (255 - g) * amount)
+    b = math.floor(b + (255 - b) * amount)
+    return string.format("#%02x%02x%02x", r, g, b)
+end
+
+local function save_tag_colors()
+    os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
+    local f = io.open(tag_colors_path, "w")
+    if not f then return end
+    for t, color in pairs(tag_colors) do
+        if t.screen and t.index then
+            f:write(t.screen.index .. "," .. t.index .. "," .. color .. "\n")
+        end
+    end
+    f:close()
+end
+
+local function load_tag_colors()
+    local f = io.open(tag_colors_path, "r")
+    if not f then return end
+    for line in f:lines() do
+        local si, ti, color = line:match("^(%d+),(%d+),(.+)$")
+        if si and ti and color then
+            local s = screen[tonumber(si)]
+            if s then
+                local t = s.tags[tonumber(ti)]
+                if t then
+                    tag_colors[t] = color
                     t:emit_signal("property::name")
                 end
             end
@@ -366,22 +410,32 @@ awful.screen.connect_for_each_screen(function(s)
     local taglist_template = {
         {
             {
-                id     = "text_role",
-                align  = "center",
-                widget = wibox.widget.textbox,
+                {
+                    id     = "text_role",
+                    align  = "center",
+                    widget = wibox.widget.textbox,
+                },
+                left   = 6,
+                right  = 6,
+                widget = wibox.container.margin,
             },
-            left   = 6,
-            right  = 6,
-            widget = wibox.container.margin,
+            id     = "color_role",
+            widget = wibox.container.background,
         },
         id     = "background_role",
         forced_width = 36,
         widget = wibox.container.background,
         create_callback = function(self, t)
             self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+            local color = tag_colors[t]
+            if color and t.selected then color = lighten_color(color, 0.4) end
+            self:get_children_by_id("color_role")[1].bg = color
         end,
         update_callback = function(self, t)
             self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+            local color = tag_colors[t]
+            if color and t.selected then color = lighten_color(color, 0.4) end
+            self:get_children_by_id("color_role")[1].bg = color
         end,
     }
 
@@ -440,6 +494,7 @@ awful.screen.connect_for_each_screen(function(s)
 end)
 
 load_tag_labels()
+load_tag_colors()
 -- }}}
 
 -- {{{ Mouse bindings
@@ -630,6 +685,8 @@ globalkeys = gears.table.join(
                               tag_labels[t] = input
                           else
                               tag_labels[t] = nil
+                              tag_colors[t] = nil
+                              save_tag_colors()
                           end
                           t:emit_signal("property::name")
                           save_tag_labels()
@@ -637,6 +694,23 @@ globalkeys = gears.table.join(
                   }
               end,
               {description = "rename workspace", group = "workspaces"}),
+    awful.key({ modkey }, ".",
+              function()
+                  local t = awful.screen.focused().selected_tag
+                  if not t then return end
+                  local current_color = tag_colors[t] or "none"
+                  local idx = 1
+                  for i = 1, #tag_color_palette do
+                      if tag_color_palette[i] == current_color then idx = i; break end
+                  end
+                  idx = (idx % #tag_color_palette) + 1
+                  local new_color = tag_color_palette[idx]
+                  if new_color == "none" then new_color = nil end
+                  tag_colors[t] = new_color
+                  save_tag_colors()
+                  t:emit_signal("property::name")
+              end,
+              {description = "cycle workspace color", group = "workspaces"}),
 
     -- Windows
     awful.key({ modkey,           }, "j",
