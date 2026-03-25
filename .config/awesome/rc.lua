@@ -430,12 +430,30 @@ awful.screen.connect_for_each_screen(function(s)
             local color = tag_colors[t]
             if color and t.selected then color = lighten_color(color, 0.4) end
             self:get_children_by_id("color_role")[1].bg = color
+            local cr = self:get_children_by_id("color_role")[1]
+            if t.selected then
+                cr.shape = gears.shape.rectangle
+                cr.shape_border_color = "#ffff00"
+                cr.shape_border_width = 2
+            else
+                cr.shape_border_color = nil
+                cr.shape_border_width = 0
+            end
         end,
         update_callback = function(self, t)
             self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
             local color = tag_colors[t]
             if color and t.selected then color = lighten_color(color, 0.4) end
             self:get_children_by_id("color_role")[1].bg = color
+            local cr = self:get_children_by_id("color_role")[1]
+            if t.selected then
+                cr.shape = gears.shape.rectangle
+                cr.shape_border_color = "#ffff00"
+                cr.shape_border_width = 2
+            else
+                cr.shape_border_color = nil
+                cr.shape_border_width = 0
+            end
         end,
     }
 
