@@ -1326,22 +1326,22 @@ do
         }
     end)
 
-    -- Poll for monitor changes via sysfs (lightweight file read, no GPU driver query)
-    -- NVIDIA drivers may not emit screen::change, so poll as a fallback
+    -- Watch for monitor changes via a stamp file touched by a udev rule
+    -- Avoids sysfs polling which triggers expensive NVIDIA EDID probes on driver 580+
+    local monitor_stamp = home .. "/.cache/monitor-hotplug-stamp"
+    local last_stamp = ""
     gears.timer {
-        timeout = 3,
+        timeout = 2,
         autostart = true,
         callback = function()
-            local hdmi_connected = false
-            for path in io.popen("cat /sys/class/drm/card*-HDMI-*/status 2>/dev/null"):lines() do
-                if path == "connected" then
-                    hdmi_connected = true
-                    break
+            local f = io.open(monitor_stamp, "r")
+            if f then
+                local content = f:read("*a")
+                f:close()
+                if content ~= last_stamp then
+                    last_stamp = content
+                    handle_hotplug()
                 end
-            end
-            local new_state = hdmi_connected and "external" or "laptop"
-            if new_state ~= read_cached_state() then
-                handle_hotplug()
             end
         end,
     }
