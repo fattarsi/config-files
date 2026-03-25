@@ -879,6 +879,16 @@ for i = 1, 10 do
                           end
                      end
                   end,
+                  {}),
+        awful.key({ modkey, "Control" }, "#" .. i + 9,
+                  function ()
+                        local screen = awful.screen.focused()
+                        local tag = screen.tags[i + 10]
+                        if tag then
+                           tag:view_only()
+                           focus_client_under_mouse()
+                        end
+                  end,
                   {})
     )
 end
