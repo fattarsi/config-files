@@ -843,8 +843,6 @@ globalkeys = gears.table.join(
         {description = "terminal", group = "launcher"}),
     awful.key({ modkey }, "space", function () awful.util.spawn("xfce4-appfinder") end,
               {description = "app finder", group = "launcher"}),
-    awful.key({ modkey }, "p", function() menubar.show() end,
-              {description = "menubar", group = "launcher"}),
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
               {description = "main menu", group = "awesome"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
@@ -893,7 +891,25 @@ clientkeys = gears.table.join(
     awful.key({ modkey,           }, "o",      function (c) c:move_to_screen()               end,
               {description = "move to screen", group = "windows"}),
     awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end,
-              {description = "keep on top", group = "windows"})
+              {description = "keep on top", group = "windows"}),
+    awful.key({ modkey,           }, "p",
+        function (c)
+            if c.floating and c.ontop then
+                -- Snap back into tiling
+                c.floating = false
+                c.ontop = false
+            else
+                -- Pop out: float, ontop, center at reasonable size
+                c.floating = true
+                c.ontop = true
+                local geo = c.screen.workarea
+                local w = math.floor(geo.width * 0.5)
+                local h = math.floor(geo.height * 0.5)
+                c:geometry({ x = geo.x + (geo.width - w) / 2, y = geo.y + (geo.height - h) / 2, width = w, height = h })
+                c:raise()
+            end
+        end,
+        {description = "pop out / snap back", group = "windows"})
 )
 
 -- Bind all key numbers to tags.
