@@ -773,14 +773,33 @@ globalkeys = gears.table.join(
     awful.key({ modkey,           }, "Tab",
         function ()
             sloppy_suppressed = true
-            awful.client.focus.byidx(1)
-            gears.timer.start_new(0.3, function() sloppy_suppressed = false end)
+            -- First press: go to previously focused client (tracking stays on so history updates)
+            awful.client.focus.history.previous()
+            if client.focus then client.focus:raise() end
+            -- Disable tracking for subsequent cycling while Mod is held
+            awful.client.focus.history.disable_tracking()
+            keygrabber.run(function(mod, key, event)
+                if event == "release" and (key == "Super_L" or key == "Super_R") then
+                    keygrabber.stop()
+                    awful.client.focus.history.enable_tracking()
+                    sloppy_suppressed = false
+                    return
+                end
+                if event ~= "press" then return end
+                if key == "Tab" then
+                    local shift = false
+                    for _, m in ipairs(mod) do if m == "Shift" then shift = true end end
+                    awful.client.focus.byidx(shift and -1 or 1)
+                    if client.focus then client.focus:raise() end
+                end
+            end)
         end,
-        {description = "next window", group = "windows"}),
+        {description = "switch to previous window", group = "windows"}),
     awful.key({ modkey, "Shift"  }, "Tab",
         function ()
             sloppy_suppressed = true
             awful.client.focus.byidx(-1)
+            if client.focus then client.focus:raise() end
             gears.timer.start_new(0.3, function() sloppy_suppressed = false end)
         end,
         {description = "previous window", group = "windows"}),
