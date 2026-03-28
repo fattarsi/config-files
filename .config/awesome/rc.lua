@@ -862,7 +862,25 @@ globalkeys = gears.table.join(
                     history_path = awful.util.get_cache_dir() .. "/history_eval"
                   }
               end,
-              {description = "lua prompt", group = "awesome"})
+              {description = "lua prompt", group = "awesome"}),
+    awful.key({ modkey, "Shift"  }, "minus",
+        function ()
+            local s = awful.screen.focused()
+            if not s then return end
+            local t = s.selected_tag
+            if not t then return end
+            for _, c in ipairs(client.get()) do
+                if c.minimized then
+                    for _, ct in ipairs(c:tags()) do
+                        if ct == t then
+                            c.minimized = false
+                            break
+                        end
+                    end
+                end
+            end
+        end,
+        {description = "restore all hidden tiles", group = "windows"})
 )
 
 clientkeys = gears.table.join(
@@ -909,7 +927,12 @@ clientkeys = gears.table.join(
                 c:raise()
             end
         end,
-        {description = "pop out / snap back", group = "windows"})
+        {description = "pop out / snap back", group = "windows"}),
+    awful.key({ modkey,           }, "minus",
+        function (c)
+            c.minimized = true
+        end,
+        {description = "hide tile", group = "windows"})
 )
 
 -- Bind all key numbers to tags.
