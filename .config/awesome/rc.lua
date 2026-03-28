@@ -163,13 +163,30 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 -- {{{ Random wallpaper rotation
 math.randomseed(os.time())
 local wallpaper_dir = '/usr/share/backgrounds/'
+local wallpaper_blacklist_path = os.getenv("HOME") .. "/.cache/awesome/wallpaper_blacklist"
+
+local function load_wallpaper_blacklist()
+    local blacklist = {}
+    local f = io.open(wallpaper_blacklist_path, "r")
+    if f then
+        for line in f:lines() do
+            blacklist[line] = true
+        end
+        f:close()
+    end
+    return blacklist
+end
+
 local function get_wallpapers()
     local wallpapers = {}
+    local blacklist = load_wallpaper_blacklist()
     local p = io.popen('find "' .. wallpaper_dir .. '" -type f \\( -name "*.png" -o -name "*.jpg" -o -name "*.webp" \\)'
         .. ' | grep -v -i -e "^.*/ubuntu" -e "Brandmark" -e "Unleash_Your_Robot"')
     if p then
         for file in p:lines() do
-            table.insert(wallpapers, file)
+            if not blacklist[file] then
+                table.insert(wallpapers, file)
+            end
         end
         p:close()
     end
@@ -184,6 +201,18 @@ local function pick_random_wallpaper()
             gears.wallpaper.maximized(beautiful.wallpaper, s, true)
         end
     end
+end
+
+local function blacklist_wallpaper()
+    if not beautiful.wallpaper then return end
+    os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
+    local f = io.open(wallpaper_blacklist_path, "a")
+    if f then
+        f:write(beautiful.wallpaper .. "\n")
+        f:close()
+    end
+    naughty.notify({ title = "Wallpaper blacklisted", text = beautiful.wallpaper, timeout = 3 })
+    pick_random_wallpaper()
 end
 
 pick_random_wallpaper()
@@ -811,6 +840,8 @@ globalkeys = gears.table.join(
               {description = "reload awesome", group = "awesome"}),
     awful.key({ modkey, "Shift"   }, "w", pick_random_wallpaper,
               {description = "random wallpaper", group = "awesome"}),
+    awful.key({ modkey, "Shift", "Control" }, "w", blacklist_wallpaper,
+              {description = "blacklist current wallpaper", group = "awesome"}),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit,
               {description = "quit awesome", group = "awesome"}),
     awful.key({ modkey }, "x",
