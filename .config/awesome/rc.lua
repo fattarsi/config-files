@@ -640,6 +640,20 @@ globalkeys = gears.table.join(
               {description="show help", group="awesome"}),
 
     -- Workspaces
+    -- Focus tiles with Alt+Mod+arrows
+    awful.key({ modkey, "Mod1"  }, "Up", function()
+        awful.client.focus.byidx(-1)
+    end, {description = "focus tile up", group = "windows"}),
+    awful.key({ modkey, "Mod1"  }, "Down", function()
+        awful.client.focus.byidx(1)
+    end, {description = "focus tile down", group = "windows"}),
+    awful.key({ modkey, "Mod1"  }, "Left", function()
+        awful.client.focus.byidx(-1)
+    end, {description = "focus tile left", group = "windows"}),
+    awful.key({ modkey, "Mod1"  }, "Right", function()
+        awful.client.focus.byidx(1)
+    end, {description = "focus tile right", group = "windows"}),
+
     awful.key({ modkey,           }, "Left",   function() awful.tag.viewprev(); focus_client_under_mouse() end,
               {description = "previous workspace", group = "workspaces"}),
     awful.key({ modkey,           }, "Right",  function() awful.tag.viewnext(); focus_client_under_mouse() end,
