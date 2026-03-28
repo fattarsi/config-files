@@ -1319,7 +1319,9 @@ do
             return
         end
 
-        -- State changed — apply it
+        -- State changed — save all state while tags are still valid
+        save_tag_labels()
+        save_tag_colors()
         save_client_tags()
         save_selected_tag()
         apply_monitor_config(new_state)
@@ -1402,6 +1404,7 @@ awful.util.spawn_with_shell('~/bin/volume-hotkeys.sh')
 
 awesome.connect_signal("exit", function(restart)
     save_tag_labels()
+    save_tag_colors()
     if restart then
         save_selected_tag()
     end
