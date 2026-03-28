@@ -506,12 +506,74 @@ awful.screen.connect_for_each_screen(function(s)
         layout = wibox.layout.fixed.vertical,
     }
 
-    -- Create a tasklist widget
-    s.mytasklist = awful.widget.tasklist {
-        screen  = s,
-        filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+    -- Window list button: shows count, click for menu
+    s.winlist_label = wibox.widget.textbox()
+    s.winlist_menu = nil
+
+    local function update_winlist(screen)
+        local t = screen.selected_tag
+        if not t then screen.winlist_label:set_text(""); return end
+        local visible, hidden = 0, 0
+        for _, c in ipairs(client.get()) do
+            for _, ct in ipairs(c:tags()) do
+                if ct == t then
+                    if c.minimized then hidden = hidden + 1 else visible = visible + 1 end
+                    break
+                end
+            end
+        end
+        if visible == 0 and hidden == 0 then
+            screen.winlist_label:set_text("")
+        elseif hidden > 0 then
+            screen.winlist_label:set_text("  [" .. visible .. "+" .. hidden .. "]  ")
+        else
+            screen.winlist_label:set_text("  [" .. visible .. "]  ")
+        end
+    end
+
+    local function show_winlist_menu(screen)
+        if screen.winlist_menu then screen.winlist_menu:hide(); screen.winlist_menu = nil end
+        local t = screen.selected_tag
+        if not t then return end
+        local items = {}
+        for _, c in ipairs(client.get()) do
+            for _, ct in ipairs(c:tags()) do
+                if ct == t then
+                    local prefix = c.minimized and "  " or ""
+                    local name = (c.class or c.name or "?")
+                    if c.name and c.name ~= c.class then
+                        name = name .. " - " .. c.name
+                    end
+                    table.insert(items, { prefix .. name, function()
+                        if c.minimized then c.minimized = false end
+                        c:emit_signal("request::activate", "winlist", {raise = true})
+                    end })
+                    break
+                end
+            end
+        end
+        if #items > 0 then
+            screen.winlist_menu = awful.menu({ items = items, theme = { width = 400 } })
+            screen.winlist_menu:show()
+        end
+    end
+
+    s.winlist_button = wibox.widget {
+        s.winlist_label,
+        widget = wibox.container.background,
     }
+    s.winlist_button:buttons(gears.table.join(
+        awful.button({}, 1, function() show_winlist_menu(s) end)
+    ))
+
+    update_winlist(s)
+    local us = s
+    client.connect_signal("manage", function() update_winlist(us) end)
+    client.connect_signal("unmanage", function() update_winlist(us) end)
+    client.connect_signal("property::minimized", function() update_winlist(us) end)
+    client.connect_signal("tagged", function() update_winlist(us) end)
+    client.connect_signal("untagged", function() update_winlist(us) end)
+    tag.connect_signal("property::selected", function() update_winlist(us) end)
 
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s, height = 58 })
@@ -526,7 +588,7 @@ awful.screen.connect_for_each_screen(function(s)
             s.mypromptbox,
             s.mytaglabel,
         },
-        s.mytasklist, -- Middle widget
+        s.winlist_button, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             sysmon.cpu,
