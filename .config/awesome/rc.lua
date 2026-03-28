@@ -760,18 +760,10 @@ globalkeys = gears.table.join(
               {description = "cycle workspace color", group = "workspaces"}),
 
     -- Windows
-    awful.key({ modkey,           }, "j",
-        function ()
-            awful.client.focus.byidx( 1)
-        end,
-        {description = "focus next window", group = "windows"}
-    ),
-    awful.key({ modkey,           }, "k",
-        function ()
-            awful.client.focus.byidx(-1)
-        end,
-        {description = "focus previous window", group = "windows"}
-    ),
+    awful.key({ modkey,           }, "j", function () awful.client.incwfact(-0.05) end,
+              {description = "shorter", group = "layout"}),
+    awful.key({ modkey,           }, "k", function () awful.client.incwfact( 0.05) end,
+              {description = "taller", group = "layout"}),
     awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end,
               {description = "swap with next window", group = "windows"}),
     awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end,
