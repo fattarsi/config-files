@@ -160,6 +160,8 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+beautiful.systray_icon_size = 24
+beautiful.systray_icon_spacing = 4
 -- {{{ Random wallpaper rotation
 math.randomseed(os.time())
 local wallpaper_dir = '/usr/share/backgrounds/'
@@ -286,8 +288,10 @@ else
 end
 
 
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+mylauncher = wibox.widget.textbox(" [A] ")
+mylauncher:buttons(gears.table.join(
+    awful.button({}, 1, function() mymainmenu:toggle() end)
+))
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -428,13 +432,6 @@ awful.screen.connect_for_each_screen(function(s)
         if t.screen == s then update_tag_label() end
     end)
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
-    -- We need one layoutbox per screen.
-    s.mylayoutbox = awful.widget.layoutbox(s)
-    s.mylayoutbox:buttons(gears.table.join(
-                           awful.button({ }, 1, function () awful.layout.inc( 1) end),
-                           awful.button({ }, 3, function () awful.layout.inc(-1) end),
-                           awful.button({ }, 4, function () awful.layout.inc( 1) end),
-                           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
     -- Create taglist widgets (2 rows of 10)
     local taglist_template = {
         {
@@ -594,10 +591,9 @@ awful.screen.connect_for_each_screen(function(s)
             sysmon.cpu,
             sysmon.mem,
             sysmon.net,
-            wibox.widget.systray(),
+            wibox.container.place(wibox.container.constraint(wibox.widget.systray(), "exact", nil, 32), "center", "center"),
             battery,
             mytextclock,
-            s.mylayoutbox,
         },
     }
 end)
