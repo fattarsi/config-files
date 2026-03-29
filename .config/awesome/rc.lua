@@ -1415,6 +1415,15 @@ do
                     end
                 end
             end
+            -- Re-apply kitty font size after restart (sockets are now ready)
+            local font_file = io.open(home .. "/.cache/kitty-font-size", "r")
+            if font_file then
+                local size = font_file:read("*a"):gsub("%s+", "")
+                font_file:close()
+                if size ~= "" then
+                    awful.spawn.with_shell("for s in /tmp/kitty-*; do kitty @ --to=unix:$s set-font-size " .. size .. " 2>/dev/null; done")
+                end
+            end
         end,
     }
 
