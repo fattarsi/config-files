@@ -529,7 +529,7 @@ awful.screen.connect_for_each_screen(function(s)
     end
 
     local function show_winlist_menu(screen)
-        if screen.winlist_menu then screen.winlist_menu:hide(); screen.winlist_menu = nil end
+        if screen.winlist_menu then screen.winlist_menu:hide(); screen.winlist_menu = nil; return end
         local t = screen.selected_tag
         if not t then return end
         local items = {}
