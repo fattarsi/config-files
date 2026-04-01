@@ -46,7 +46,7 @@ vicious.register(cpu_graph, vicious.widgets.cpu, function(widget, args)
         end
     )
     return args[1]
-end, 3)
+end, 1)
 local cpu_menu = nil
 cpu_widget:buttons(gears.table.join(awful.button({}, 1, function()
     if cpu_menu then cpu_menu:hide(); cpu_menu = nil; return end
@@ -71,7 +71,7 @@ local mem_tooltip = awful.tooltip({ objects = {mem_widget} })
 vicious.register(mem_graph, vicious.widgets.mem, function(widget, args)
     mem_tooltip:set_text(string.format("Mem: %s%% | %sMB / %sMB", args[1], args[2], args[3]))
     return args[1]
-end, 5)
+end, 1)
 local mem_menu = nil
 mem_widget:buttons(gears.table.join(awful.button({}, 1, function()
     if mem_menu then mem_menu:hide(); mem_menu = nil; return end
@@ -123,7 +123,7 @@ vicious.register(net_graph, vicious.widgets.net, function(widget, args)
     -- Auto-scale: track max and normalize to 0-100
     if down > net_max then net_max = down end
     return (net_max > 0) and (down / net_max * 100) or 0
-end, 2)
+end, 1)
 net_widget:buttons(gears.table.join(awful.button({}, 1, function()
     awful.spawn("gnome-system-monitor")
 end)))
