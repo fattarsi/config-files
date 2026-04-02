@@ -732,9 +732,11 @@ globalkeys = gears.table.join(
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
         tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
+        save_tag_colors()
         other:view_only()
         focus_client_under_mouse()
     end, {description = "swap workspace left", group = "workspaces"}),
@@ -748,9 +750,11 @@ globalkeys = gears.table.join(
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
         tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
+        save_tag_colors()
         other:view_only()
         focus_client_under_mouse()
     end, {description = "swap workspace right", group = "workspaces"}),
@@ -766,9 +770,11 @@ globalkeys = gears.table.join(
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
         tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
+        save_tag_colors()
         other:view_only()
         focus_client_under_mouse()
     end, {description = "swap workspace row up", group = "workspaces"}),
@@ -784,9 +790,11 @@ globalkeys = gears.table.join(
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
         tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
+        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
+        save_tag_colors()
         other:view_only()
         focus_client_under_mouse()
     end, {description = "swap workspace row down", group = "workspaces"}),
