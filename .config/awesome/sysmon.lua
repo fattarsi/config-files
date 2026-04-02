@@ -36,16 +36,26 @@ local cpu_graph = make_graph("#ff6e67")
 local cpu_widget = wrap_graph(cpu_graph)
 local cpu_tooltip = awful.tooltip({ objects = {cpu_widget} })
 vicious.register(cpu_graph, vicious.widgets.cpu, function(widget, args)
+    local val = args[1]
+    if val < 30 then
+        cpu_graph:set_color("#5af78e")     -- green
+    elseif val < 60 then
+        cpu_graph:set_color("#f3f99d")     -- yellow
+    elseif val < 80 then
+        cpu_graph:set_color("#ff9e64")     -- orange
+    else
+        cpu_graph:set_color("#ff6e67")     -- red
+    end
     awful.spawn.easy_async(
         {"sh", "-c", "ps -eo comm,%cpu --sort=-%cpu --no-headers | head -1"},
         function(stdout)
             local name, pct = stdout:match("^(%S+)%s+(%S+)")
             if name then
-                cpu_tooltip:set_text("CPU: " .. args[1] .. "% | " .. name .. " " .. pct .. "%")
+                cpu_tooltip:set_text("CPU: " .. val .. "% | " .. name .. " " .. pct .. "%")
             end
         end
     )
-    return args[1]
+    return val
 end, 1)
 local cpu_menu = nil
 cpu_widget:buttons(gears.table.join(awful.button({}, 1, function()
