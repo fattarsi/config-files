@@ -925,6 +925,10 @@ globalkeys = gears.table.join(
               {description = "app finder", group = "launcher"}),
     awful.key({ modkey }, "a", function () awful.util.spawn("rofi -show window") end,
               {description = "window list", group = "launcher"}),
+    awful.key({ modkey }, "c", function () awful.util.spawn_with_shell("rofi -modi 'clipboard:greenclip print' -show clipboard") end,
+              {description = "clipboard history", group = "launcher"}),
+    awful.key({ modkey }, "v", function () awful.util.spawn_with_shell("rofi -modi 'clipboard:greenclip print' -show clipboard -kb-accept-entry Return -kb-cancel Escape && sleep 0.05 && xdotool key --clearmodifiers ctrl+v") end,
+              {description = "paste from clipboard history", group = "launcher"}),
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
               {description = "main menu", group = "awesome"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
@@ -1551,4 +1555,7 @@ awesome.connect_signal("exit", function(restart)
     end
     awful.spawn.with_shell("pkill -f volume-hotkeys.sh")
 end)
+
+-- Clipboard manager daemon
+awful.spawn.with_shell("pgrep -x greenclip || greenclip daemon &")
 
