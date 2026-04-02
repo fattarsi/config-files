@@ -915,6 +915,8 @@ globalkeys = gears.table.join(
         {description = "terminal", group = "launcher"}),
     awful.key({ modkey }, "space", function () awful.util.spawn("xfce4-appfinder") end,
               {description = "app finder", group = "launcher"}),
+    awful.key({ modkey }, "a", function () awful.util.spawn("rofi -show window") end,
+              {description = "window list", group = "launcher"}),
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end,
               {description = "main menu", group = "awesome"}),
     awful.key({ modkey, "Control" }, "r", awesome.restart,
