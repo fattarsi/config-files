@@ -160,5 +160,32 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+# nav - fuzzy file browser (cd to final directory on exit)
+function n() {
+	local result dest
+	result=$(nav)
+	if [[ "$result" == *$'\n'* ]]; then
+		local last_line="${result##*$'\n'}"
+		local first_line="${result%%$'\n'*}"
+		if [[ "$first_line" == OPEN:* ]]; then
+			${EDITOR:-vim} "${first_line#OPEN:}"
+			return
+		fi
+		dest="$last_line"
+	else
+		dest="$result"
+	fi
+	if [ -n "$dest" ] && [ "$dest" != "$PWD" ]; then
+		builtin cd -- "$dest"
+	fi
+}
+
 # Local config (not tracked by git)
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+# bun completions
+[ -s "/home/fattarsi/.bun/_bun" ] && source "/home/fattarsi/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
