@@ -2,6 +2,9 @@
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
 
+local lgi = require("lgi")
+local cairo = lgi.cairo
+
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -434,54 +437,78 @@ awful.screen.connect_for_each_screen(function(s)
     end)
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- Create taglist widgets (2 rows of 10)
+    local function make_checker_pattern(size)
+        local s = size or 3
+        local img = cairo.ImageSurface.create(cairo.Format.ARGB32, s * 2, s * 2)
+        local cr = cairo.Context(img)
+        local c1 = { gears.color.parse_color("#ffff00") }
+        local c2 = { gears.color.parse_color("#000000") }
+        cr:set_source_rgba(c1[1], c1[2], c1[3], c1[4])
+        cr:rectangle(0, 0, s, s)
+        cr:rectangle(s, s, s, s)
+        cr:fill()
+        cr:set_source_rgba(c2[1], c2[2], c2[3], c2[4])
+        cr:rectangle(s, 0, s, s)
+        cr:rectangle(0, s, s, s)
+        cr:fill()
+        local pattern = cairo.Pattern.create_for_surface(img)
+        pattern:set_extend(cairo.Extend.REPEAT)
+        return pattern
+    end
+    local checker_pattern = make_checker_pattern(3)
+
+    local function update_tag_widget(self, t)
+        self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
+        local cr = self:get_children_by_id("color_role")[1]
+        local color = tag_colors[t]
+        if color and t.selected then color = lighten_color(color, 0.4) end
+        local border = self:get_children_by_id("border_role")[1]
+        local margin = self:get_children_by_id("border_margin")[1]
+        if t.selected then
+            cr.bg = checker_pattern
+            if tag_colors[t] then
+                border.bg = tag_colors[t]
+                margin.margins = 3
+            else
+                border.bg = nil
+                margin.margins = 0
+            end
+        else
+            cr.bg = color
+            border.bg = nil
+            margin.margins = 0
+        end
+    end
+
     local taglist_template = {
         {
             {
                 {
-                    id     = "text_role",
-                    align  = "center",
-                    widget = wibox.widget.textbox,
+                    {
+                        {
+                            id     = "text_role",
+                            align  = "center",
+                            widget = wibox.widget.textbox,
+                        },
+                        left   = 6,
+                        right  = 6,
+                        widget = wibox.container.margin,
+                    },
+                    id     = "color_role",
+                    widget = wibox.container.background,
                 },
-                left   = 6,
-                right  = 6,
+                id     = "border_margin",
+                margins = 0,
                 widget = wibox.container.margin,
             },
-            id     = "color_role",
+            id     = "border_role",
             widget = wibox.container.background,
         },
         id     = "background_role",
         forced_width = 36,
         widget = wibox.container.background,
-        create_callback = function(self, t)
-            self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
-            local color = tag_colors[t]
-            if color and t.selected then color = lighten_color(color, 0.4) end
-            self:get_children_by_id("color_role")[1].bg = color
-            local cr = self:get_children_by_id("color_role")[1]
-            if t.selected then
-                cr.shape = gears.shape.rectangle
-                cr.shape_border_color = "#ffff00"
-                cr.shape_border_width = 2
-            else
-                cr.shape_border_color = nil
-                cr.shape_border_width = 0
-            end
-        end,
-        update_callback = function(self, t)
-            self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
-            local color = tag_colors[t]
-            if color and t.selected then color = lighten_color(color, 0.4) end
-            self:get_children_by_id("color_role")[1].bg = color
-            local cr = self:get_children_by_id("color_role")[1]
-            if t.selected then
-                cr.shape = gears.shape.rectangle
-                cr.shape_border_color = "#ffff00"
-                cr.shape_border_width = 2
-            else
-                cr.shape_border_color = nil
-                cr.shape_border_width = 0
-            end
-        end,
+        create_callback = function(self, t) update_tag_widget(self, t) end,
+        update_callback = function(self, t) update_tag_widget(self, t) end,
     }
 
     s.mytaglist_top = awful.widget.taglist {
