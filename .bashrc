@@ -5,10 +5,12 @@ fi
 export DOTNET_ROOT=$HOME/.dotnet
 
 # kubectl autocomplete
-source <(kubectl completion bash)
-alias kpo="kubectl get po --all-namespaces"
-alias k="kubectl"
-complete -o default -F __start_kubectl k
+if command -v kubectl &> /dev/null; then
+    source <(kubectl completion bash)
+    alias kpo="kubectl get po --all-namespaces"
+    alias k="kubectl"
+    complete -o default -F __start_kubectl k
+fi
 
 # dev container
 alias dev="docker run -it dev"
