@@ -79,8 +79,18 @@ local mem_graph = make_graph("#5af78e")
 local mem_widget = wrap_graph(mem_graph)
 local mem_tooltip = awful.tooltip({ objects = {mem_widget} })
 vicious.register(mem_graph, vicious.widgets.mem, function(widget, args)
-    mem_tooltip:set_text(string.format("Mem: %s%% | %sMB / %sMB", args[1], args[2], args[3]))
-    return args[1]
+    local val = args[1]
+    if val < 30 then
+        mem_graph:set_color("#5af78e")     -- green
+    elseif val < 60 then
+        mem_graph:set_color("#f3f99d")     -- yellow
+    elseif val < 80 then
+        mem_graph:set_color("#ff9e64")     -- orange
+    else
+        mem_graph:set_color("#ff6e67")     -- red
+    end
+    mem_tooltip:set_text(string.format("Mem: %s%% | %sMB / %sMB", val, args[2], args[3]))
+    return val
 end, 1)
 local mem_menu = nil
 mem_widget:buttons(gears.table.join(awful.button({}, 1, function()
