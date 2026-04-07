@@ -11,6 +11,7 @@ local wibox = require("wibox")
 local battery = require("battery")
 local sysmon = require("sysmon")
 local calendar = require("calendar")
+require("claude-notify")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -632,6 +633,33 @@ globalkeys = gears.table.join(
             awful.spawn("brightnessctl set 5%-", false)
         end,
         {description = "brightness down", group="system"}),
+    awful.key({}, "XF86AudioRaiseVolume",
+        function ()
+            awful.spawn.easy_async("pactl set-sink-volume @DEFAULT_SINK@ +1%", function()
+                awful.spawn.easy_async_with_shell(
+                    "pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '[0-9]+%' | head -1",
+                    function(vol) naughty.notify({ title = "Volume Up", text = vol:gsub("%s+$", ""), replaces_id = 1 }) end)
+            end)
+        end,
+        {description = "volume up", group="system"}),
+    awful.key({}, "XF86AudioLowerVolume",
+        function ()
+            awful.spawn.easy_async("pactl set-sink-volume @DEFAULT_SINK@ -1%", function()
+                awful.spawn.easy_async_with_shell(
+                    "pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '[0-9]+%' | head -1",
+                    function(vol) naughty.notify({ title = "Volume Down", text = vol:gsub("%s+$", ""), replaces_id = 1 }) end)
+            end)
+        end,
+        {description = "volume down", group="system"}),
+    awful.key({}, "XF86AudioMute",
+        function ()
+            awful.spawn.easy_async("pactl set-sink-mute @DEFAULT_SINK@ toggle", function()
+                awful.spawn.easy_async_with_shell(
+                    "pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}'",
+                    function(mute) naughty.notify({ title = "Mute", text = mute:gsub("%s+$", ""), replaces_id = 1 }) end)
+            end)
+        end,
+        {description = "toggle mute", group="system"}),
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
               {description="show help", group="awesome"}),
 
@@ -838,6 +866,30 @@ globalkeys = gears.table.join(
                   t:emit_signal("property::name")
               end,
               {description = "cycle workspace color", group = "workspaces"}),
+    awful.key({ modkey, "Shift"  }, ".",
+              function()
+                  local t = awful.screen.focused().selected_tag
+                  if not t then return end
+                  local current = tag_colors[t] or "#333333"
+                  awful.spawn.easy_async(
+                      "zenity --color-selection --color=" .. current,
+                      function(stdout)
+                          local hex = stdout:match("rgb%((%d+),(%d+),(%d+)%)")
+                          if hex then
+                              local r, g, b = stdout:match("rgb%((%d+),(%d+),(%d+)%)")
+                              hex = string.format("#%02x%02x%02x", r, g, b)
+                          else
+                              hex = stdout:match("(#%x%x%x%x%x%x)")
+                          end
+                          if hex then
+                              tag_colors[t] = hex
+                              save_tag_colors()
+                              t:emit_signal("property::name")
+                          end
+                      end
+                  )
+              end,
+              {description = "pick workspace color", group = "workspaces"}),
 
     -- Windows
     awful.key({ modkey,           }, "j", function () awful.client.incwfact(-0.05) end,
@@ -1545,15 +1597,12 @@ awful.util.spawn_with_shell('pgrep -x nm-applet || nm-applet')
 -- Lock screen script
 awful.util.spawn_with_shell('xset +dpms && xset dpms 720 720 720')
 awful.util.spawn_with_shell('~/.config/awesome/locker.sh')
-awful.util.spawn_with_shell('~/bin/volume-hotkeys.sh')
-
 awesome.connect_signal("exit", function(restart)
     save_tag_labels()
     save_tag_colors()
     if restart then
         save_selected_tag()
     end
-    awful.spawn.with_shell("pkill -f volume-hotkeys.sh")
 end)
 
 -- Clipboard manager daemon
