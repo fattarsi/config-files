@@ -464,19 +464,23 @@ awful.screen.connect_for_each_screen(function(s)
         if color and t.selected then color = lighten_color(color, 0.4) end
         local border = self:get_children_by_id("border_role")[1]
         local margin = self:get_children_by_id("border_margin")[1]
+        local urgent = false
+        for _, c in ipairs(t:clients()) do
+            if c.urgent then urgent = true; break end
+        end
+        margin.left = 2
+        margin.right = 2
+        margin.top = 0
+        margin.bottom = 0
         if t.selected then
             cr.bg = checker_pattern
-            if tag_colors[t] then
-                border.bg = tag_colors[t]
-                margin.margins = 3
-            else
-                border.bg = nil
-                margin.margins = 0
-            end
+            border.bg = tag_colors[t] or beautiful.bg_normal or "#222222"
+        elseif urgent then
+            cr.bg = checker_pattern
+            border.bg = "#ff6600"
         else
             cr.bg = color
-            border.bg = nil
-            margin.margins = 0
+            border.bg = color or beautiful.bg_normal or "#222222"
         end
     end
 
@@ -490,8 +494,8 @@ awful.screen.connect_for_each_screen(function(s)
                             align  = "center",
                             widget = wibox.widget.textbox,
                         },
-                        left   = 6,
-                        right  = 6,
+                        left   = 2,
+                        right  = 2,
                         widget = wibox.container.margin,
                     },
                     id     = "color_role",
@@ -505,7 +509,7 @@ awful.screen.connect_for_each_screen(function(s)
             widget = wibox.container.background,
         },
         id     = "background_role",
-        forced_width = 36,
+        forced_width = 40,
         widget = wibox.container.background,
         create_callback = function(self, t) update_tag_widget(self, t) end,
         update_callback = function(self, t) update_tag_widget(self, t) end,
