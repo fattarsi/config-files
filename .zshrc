@@ -6,8 +6,17 @@ export PATH=$HOME/.local/bin:/usr/local/go/bin:$HOME/go/bin:$PATH
 # Directly source the Oh My Zsh plugins you use without enabling the full
 # framework or its theme system.
 export ZSH="$HOME/.oh-my-zsh"
+if mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-zsh/completions" 2>/dev/null; then
+  export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-zsh"
+else
+  export ZSH_CACHE_DIR="/tmp/oh-my-zsh-$USER"
+  mkdir -p "$ZSH_CACHE_DIR/completions"
+fi
 for plugin_file in \
   "$ZSH/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" \
+  "$ZSH/plugins/docker/docker.plugin.zsh" \
+  "$ZSH/plugins/git/git.plugin.zsh" \
+  "$ZSH/plugins/kubectl/kubectl.plugin.zsh" \
   "$ZSH/plugins/zoxide/zoxide.plugin.zsh" \
   "$ZSH/plugins/command-not-found/command-not-found.plugin.zsh"
 do
@@ -60,8 +69,6 @@ setopt appendhistory
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-
-alias k="kubectl"
 
 # tab completion to work more like bash
 setopt noautomenu
