@@ -45,6 +45,9 @@
 !.config/awesome/locker.sh
 !.config/awesome/.xprofile
 !.config/awesome/.Xresources
+!.config/awesome/claude-notify.lua
+!.config/awesome/claude-notify-listener.py
+!.config/awesome/double-tap-home.sh
 
 # Bin scripts
 !bin
