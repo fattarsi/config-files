@@ -1648,3 +1648,6 @@ end)
 -- Clipboard manager daemon
 awful.spawn.with_shell("pgrep -x greenclip || greenclip daemon &")
 
+-- Double-tap Home → End
+awful.spawn.with_shell("pkill -f double-tap-home; ~/.config/awesome/double-tap-home.sh &")
+
