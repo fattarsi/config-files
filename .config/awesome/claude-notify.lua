@@ -46,6 +46,22 @@ local function handle_message(line)
         text = "Ready for input in " .. (project ~= "" and project or "unknown"),
         position = "bottom_right",
         timeout = 20,
+        run = function(notif)
+            if t then t:view_only() end
+            if target_client then
+                target_client:raise()
+                client.focus = target_client
+            elseif wid > 0 then
+                for _, c in ipairs(client.get()) do
+                    if c.window == wid then
+                        c:raise()
+                        client.focus = c
+                        break
+                    end
+                end
+            end
+            naughty.destroy(notif)
+        end,
     })
 
     if n then
@@ -55,25 +71,6 @@ local function handle_message(line)
                 if nn == n then table.remove(active_notifications, i); break end
             end
         end)
-    end
-
-    if n and n.box and t then
-        n.box:buttons(gears.table.join(
-            awful.button({}, 1, function()
-                t:view_only()
-                for _, c in ipairs(client.get()) do
-                    if c.window == wid then
-                        c:raise()
-                        client.focus = c
-                        break
-                    end
-                end
-                naughty.destroy(n)
-            end),
-            awful.button({}, 3, function()
-                naughty.destroy(n)
-            end)
-        ))
     end
 
     awful.spawn({"paplay", SOUND})
