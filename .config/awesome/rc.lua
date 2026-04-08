@@ -14,7 +14,7 @@ local wibox = require("wibox")
 local battery = require("battery")
 local sysmon = require("sysmon")
 local calendar = require("calendar")
-require("claude-notify")
+local claude_notify = require("claude-notify")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -437,12 +437,12 @@ awful.screen.connect_for_each_screen(function(s)
     end)
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- Create taglist widgets (2 rows of 10)
-    local function make_checker_pattern(size)
+    local function make_checker_pattern(color1, color2, size)
         local s = size or 3
         local img = cairo.ImageSurface.create(cairo.Format.ARGB32, s * 2, s * 2)
         local cr = cairo.Context(img)
-        local c1 = { gears.color.parse_color("#ffff00") }
-        local c2 = { gears.color.parse_color("#000000") }
+        local c1 = { gears.color.parse_color(color1) }
+        local c2 = { gears.color.parse_color(color2) }
         cr:set_source_rgba(c1[1], c1[2], c1[3], c1[4])
         cr:rectangle(0, 0, s, s)
         cr:rectangle(s, s, s, s)
@@ -455,7 +455,8 @@ awful.screen.connect_for_each_screen(function(s)
         pattern:set_extend(cairo.Extend.REPEAT)
         return pattern
     end
-    local checker_pattern = make_checker_pattern(3)
+    local checker_selected = make_checker_pattern("#ffff00", "#000000", 3)
+    local checker_urgent   = make_checker_pattern("#ff6600", "#000000", 3)
 
     local function update_tag_widget(self, t)
         self:get_children_by_id("text_role")[1].text = " " .. get_display_label(t) .. " "
@@ -468,19 +469,24 @@ awful.screen.connect_for_each_screen(function(s)
         for _, c in ipairs(t:clients()) do
             if c.urgent then urgent = true; break end
         end
-        margin.left = 2
-        margin.right = 2
+        margin.left = 0
+        margin.right = 0
         margin.top = 0
         margin.bottom = 0
         if t.selected then
-            cr.bg = checker_pattern
-            border.bg = tag_colors[t] or beautiful.bg_normal or "#222222"
+            cr.bg = checker_selected
+            border.shape = gears.shape.rectangle
+            border.shape_border_color = tag_colors[t] or beautiful.bg_normal or "#222222"
+            border.shape_border_width = 4
         elseif urgent then
-            cr.bg = checker_pattern
-            border.bg = "#ff6600"
+            cr.bg = checker_urgent
+            border.shape = gears.shape.rectangle
+            border.shape_border_color = tag_colors[t] or beautiful.bg_normal or "#222222"
+            border.shape_border_width = 4
         else
             cr.bg = color
-            border.bg = color or beautiful.bg_normal or "#222222"
+            border.shape_border_width = 0
+            border.shape_border_color = nil
         end
     end
 
@@ -931,7 +937,10 @@ globalkeys = gears.table.join(
               {description = "swap with next window", group = "windows"}),
     awful.key({ modkey, "Shift"   }, "k", function () awful.client.swap.byidx( -1)    end,
               {description = "swap with previous window", group = "windows"}),
-    awful.key({ modkey,           }, "u", awful.client.urgent.jumpto,
+    awful.key({ modkey,           }, "u", function()
+                  awful.client.urgent.jumpto()
+                  claude_notify.dismiss_all()
+              end,
               {description = "jump to urgent window", group = "windows"}),
     awful.key({ modkey,           }, "Tab",
         function ()
