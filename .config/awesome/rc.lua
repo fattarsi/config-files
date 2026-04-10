@@ -50,17 +50,30 @@ tag_labels = {}      -- manual labels keyed by tag object (global for awesome-cl
 tag_colors = {}      -- per-tag background colors keyed by tag object
 local tag_color_palette = { "none", "#cc3333", "#3366cc", "#33aa55" }
 
+-- Index-keyed tables: survive tag object GC, used for persistence
+local labels_by_index = {}
+local colors_by_index = {}
+
+local function set_tag_label(t, label)
+    tag_labels[t] = label
+    if t.index then labels_by_index[t.index] = label end
+end
+
+local function set_tag_color(t, color)
+    tag_colors[t] = color
+    if t.index then colors_by_index[t.index] = color end
+end
+
 local tag_labels_path = os.getenv("HOME") .. "/.cache/awesome/tag_labels"
 local tag_colors_path = os.getenv("HOME") .. "/.cache/awesome/tag_colors"
 
 local function save_tag_labels()
     os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
+    if not next(labels_by_index) then return end
     local f = io.open(tag_labels_path, "w")
     if not f then return end
-    for t, label in pairs(tag_labels) do
-        if t.screen and t.index then
-            f:write(t.screen.index .. "," .. t.index .. "," .. label .. "\n")
-        end
+    for idx, label in pairs(labels_by_index) do
+        f:write(idx .. "," .. label .. "\n")
     end
     f:close()
 end
@@ -69,10 +82,10 @@ local function load_tag_labels()
     local f = io.open(tag_labels_path, "r")
     if not f then return end
     for line in f:lines() do
-        local si, ti, label = line:match("^(%d+),(%d+),(.+)$")
-        if si and ti and label then
-            local s = screen[tonumber(si)]
-            if s then
+        local ti, label = line:match("^(%d+),(.+)$")
+        if ti and label then
+            labels_by_index[tonumber(ti)] = label
+            for s in screen do
                 local t = s.tags[tonumber(ti)]
                 if t then
                     tag_labels[t] = label
@@ -96,12 +109,11 @@ end
 
 local function save_tag_colors()
     os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/awesome")
+    if not next(colors_by_index) then return end
     local f = io.open(tag_colors_path, "w")
     if not f then return end
-    for t, color in pairs(tag_colors) do
-        if t.screen and t.index then
-            f:write(t.screen.index .. "," .. t.index .. "," .. color .. "\n")
-        end
+    for idx, color in pairs(colors_by_index) do
+        f:write(idx .. "," .. color .. "\n")
     end
     f:close()
 end
@@ -110,10 +122,10 @@ local function load_tag_colors()
     local f = io.open(tag_colors_path, "r")
     if not f then return end
     for line in f:lines() do
-        local si, ti, color = line:match("^(%d+),(%d+),(.+)$")
-        if si and ti and color then
-            local s = screen[tonumber(si)]
-            if s then
+        local ti, color = line:match("^(%d+),(.+)$")
+        if ti and color then
+            colors_by_index[tonumber(ti)] = color
+            for s in screen do
                 local t = s.tags[tonumber(ti)]
                 if t then
                     tag_colors[t] = color
@@ -648,8 +660,51 @@ root.buttons(gears.table.join(
 ))
 -- }}}
 
+-- {{{ Scratchpad notepad
+local scratchpad_client = nil
+
+local function toggle_scratchpad()
+    if scratchpad_client and scratchpad_client.valid then
+        if scratchpad_client.hidden then
+            scratchpad_client.hidden = false
+            scratchpad_client:raise()
+            client.focus = scratchpad_client
+        else
+            scratchpad_client.hidden = true
+        end
+    else
+        awful.spawn("kitty --class scratchpad-notepad vim " .. os.getenv("HOME") .. "/notes.md")
+    end
+end
+
+client.connect_signal("manage", function(c)
+    if c.class == "scratchpad-notepad" then
+        scratchpad_client = c
+        c.floating = true
+        c.sticky = true
+        c.ontop = true
+        c.skip_taskbar = true
+        c.hidden = true
+        local s = awful.screen.focused()
+        local w = math.floor(s.geometry.width * 0.5)
+        local h = math.floor(s.geometry.height * 0.6)
+        c:geometry({
+            x = s.geometry.x + math.floor((s.geometry.width - w) / 2),
+            y = s.geometry.y + math.floor((s.geometry.height - h) / 2),
+            width = w,
+            height = h,
+        })
+        c:connect_signal("unmanage", function()
+            scratchpad_client = nil
+        end)
+    end
+end)
+-- }}}
+
 -- {{{ Key bindings
 globalkeys = gears.table.join(
+    awful.key({ modkey }, "grave", toggle_scratchpad,
+        {description = "toggle notepad", group="system"}),
     awful.key({ modkey, "Control" }, "l",
         function ()
             awful.spawn("xautolock -locknow")
@@ -657,7 +712,7 @@ globalkeys = gears.table.join(
         {description = "lock screen", group="system"}),
     awful.key({ modkey, "Shift"   }, "s",
         function ()
-            awful.spawn.with_shell("~/bin/speech_to_text.sh")
+            awful.spawn.with_shell("~/.local/bin/speech_to_text.sh")
         end,
         {description = "speech to text", group="system"}),
     awful.key({}, "XF86MonBrightnessUp",
@@ -796,8 +851,10 @@ globalkeys = gears.table.join(
         local o_clients = other:clients()
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
-        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
-        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
+        local tl, ol = tag_labels[other], tag_labels[t]
+        set_tag_label(t, tl); set_tag_label(other, ol)
+        local tc, oc = tag_colors[other], tag_colors[t]
+        set_tag_color(t, tc); set_tag_color(other, oc)
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
@@ -814,8 +871,10 @@ globalkeys = gears.table.join(
         local o_clients = other:clients()
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
-        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
-        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
+        local tl, ol = tag_labels[other], tag_labels[t]
+        set_tag_label(t, tl); set_tag_label(other, ol)
+        local tc, oc = tag_colors[other], tag_colors[t]
+        set_tag_color(t, tc); set_tag_color(other, oc)
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
@@ -834,8 +893,10 @@ globalkeys = gears.table.join(
         local o_clients = other:clients()
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
-        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
-        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
+        local tl, ol = tag_labels[other], tag_labels[t]
+        set_tag_label(t, tl); set_tag_label(other, ol)
+        local tc, oc = tag_colors[other], tag_colors[t]
+        set_tag_color(t, tc); set_tag_color(other, oc)
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
@@ -854,8 +915,10 @@ globalkeys = gears.table.join(
         local o_clients = other:clients()
         for _, c in ipairs(t_clients) do c:move_to_tag(other) end
         for _, c in ipairs(o_clients) do c:move_to_tag(t) end
-        tag_labels[t], tag_labels[other] = tag_labels[other], tag_labels[t]
-        tag_colors[t], tag_colors[other] = tag_colors[other], tag_colors[t]
+        local tl, ol = tag_labels[other], tag_labels[t]
+        set_tag_label(t, tl); set_tag_label(other, ol)
+        local tc, oc = tag_colors[other], tag_colors[t]
+        set_tag_color(t, tc); set_tag_color(other, oc)
         t:emit_signal("property::name")
         other:emit_signal("property::name")
         save_tag_labels()
@@ -874,10 +937,10 @@ globalkeys = gears.table.join(
                           local t = awful.screen.focused().selected_tag
                           if not t then return end
                           if input and input ~= "" then
-                              tag_labels[t] = input
+                              set_tag_label(t, input)
                           else
-                              tag_labels[t] = nil
-                              tag_colors[t] = nil
+                              set_tag_label(t, nil)
+                              set_tag_color(t, nil)
                               save_tag_colors()
                           end
                           t:emit_signal("property::name")
@@ -898,7 +961,7 @@ globalkeys = gears.table.join(
                   idx = (idx % #tag_color_palette) + 1
                   local new_color = tag_color_palette[idx]
                   if new_color == "none" then new_color = nil end
-                  tag_colors[t] = new_color
+                  set_tag_color(t, new_color)
                   save_tag_colors()
                   t:emit_signal("property::name")
               end,
@@ -919,7 +982,7 @@ globalkeys = gears.table.join(
                               hex = stdout:match("(#%x%x%x%x%x%x)")
                           end
                           if hex then
-                              tag_colors[t] = hex
+                              set_tag_color(t, hex)
                               save_tag_colors()
                               t:emit_signal("property::name")
                           end
@@ -1556,9 +1619,9 @@ do
             return
         end
 
-        -- State changed — save all state while tags are still valid
-        save_tag_labels()
-        save_tag_colors()
+        -- State changed — tag labels and colors are already saved on every
+        -- change, so don't re-save here (tags may already be invalid).
+        -- Only save client/selected state which is still valid.
         save_client_tags()
         save_selected_tag()
         apply_monitor_config(new_state)
@@ -1638,16 +1701,28 @@ awful.util.spawn_with_shell('pgrep -x nm-applet || nm-applet')
 awful.util.spawn_with_shell('xset +dpms && xset dpms 720 720 720')
 awful.util.spawn_with_shell('~/.config/awesome/locker.sh')
 awesome.connect_signal("exit", function(restart)
-    save_tag_labels()
-    save_tag_colors()
+    -- Only save labels/colors if tags are still valid (not during hotplug restart)
+    local has_valid_tags = false
+    for s in screen do
+        if s.tags and #s.tags > 0 then has_valid_tags = true; break end
+    end
+    if has_valid_tags then
+        save_tag_labels()
+        save_tag_colors()
+    end
     if restart then
         save_selected_tag()
     end
 end)
 
+-- Touchpad tap-to-click
+awful.spawn.with_shell("xinput set-prop 'ELAN0412:01 04F3:32EE Touchpad' 'libinput Tapping Enabled' 1 2>/dev/null")
+
 -- Clipboard manager daemon
 awful.spawn.with_shell("pgrep -x greenclip || greenclip daemon &")
 
 -- Double-tap Home → End
-awful.spawn.with_shell("pkill -f double-tap-home; ~/.config/awesome/double-tap-home.sh &")
+awful.spawn.with_line_callback("bash " .. os.getenv("HOME") .. "/.config/awesome/double-tap-home.sh", {
+    stderr = function(line) end,
+})
 
