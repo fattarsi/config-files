@@ -694,6 +694,39 @@ awful.screen.connect_for_each_screen(function(s)
     client.connect_signal("untagged", function() update_winlist(us) end)
     tag.connect_signal("property::selected", function() update_winlist(us) end)
 
+    -- Media control widget (play/pause + seek ±15/30s, auto-hides when nothing is playing)
+    s.mediactl = { back = wibox.widget.textbox(), play = wibox.widget.textbox(), fwd = wibox.widget.textbox() }
+    s.mediactl.back:set_markup("<span size='large'>  -15  </span>")
+    s.mediactl.play:set_markup("<span size='large'>  ▶  </span>")
+    s.mediactl.fwd:set_markup("<span size='large'>  +30  </span>")
+    s.mediactl.back:buttons(gears.table.join(
+        awful.button({}, 1, function() awful.spawn.with_shell("playerctl position 15- 2>/dev/null") end)))
+    s.mediactl.play:buttons(gears.table.join(
+        awful.button({}, 1, function() awful.spawn.with_shell("playerctl play-pause 2>/dev/null") end)))
+    s.mediactl.fwd:buttons(gears.table.join(
+        awful.button({}, 1, function() awful.spawn.with_shell("playerctl position 30+ 2>/dev/null") end)))
+    s.mediactl.widget = wibox.widget {
+        s.mediactl.back, s.mediactl.play, s.mediactl.fwd,
+        layout = wibox.layout.fixed.horizontal,
+        visible = false,
+    }
+    local function update_mediactl()
+        awful.spawn.easy_async_with_shell("playerctl status 2>/dev/null", function(stdout)
+            local status = stdout:gsub("%s+", "")
+            if status == "" or status == "Stopped" then
+                s.mediactl.widget.visible = false
+            else
+                s.mediactl.widget.visible = true
+                if status == "Playing" then
+                    s.mediactl.play:set_markup("<span size='large'>  ⏸  </span>")
+                else
+                    s.mediactl.play:set_markup("<span size='large'>  ▶  </span>")
+                end
+            end
+        end)
+    end
+    gears.timer { timeout = 2, call_now = true, autostart = true, callback = update_mediactl }
+
     -- Create the wibox
     s.mywibox = awful.wibar({ position = "top", screen = s, height = 58 })
 
@@ -710,6 +743,7 @@ awful.screen.connect_for_each_screen(function(s)
         s.winlist_button, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
+            s.mediactl.widget,
             sysmon.cpu,
             sysmon.mem,
             sysmon.net,
