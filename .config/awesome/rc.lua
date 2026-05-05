@@ -48,7 +48,7 @@ end
 -- {{{ Workspace labels
 tag_labels = {}      -- manual labels keyed by tag object (global for awesome-client access)
 tag_colors = {}      -- per-tag background colors keyed by tag object
-local tag_color_palette = { "none", "#cc3333", "#3366cc", "#33aa55" }
+local tag_color_palette = { "none", "#cc3333", "#3366cc", "#33aa55", "#9933cc", "#ccaa33" }
 
 -- Index-keyed tables: survive tag object GC, used for persistence
 local labels_by_index = {}
@@ -144,6 +144,78 @@ local function get_display_label(t)
         return num .. ": " .. label
     else
         return tostring(num)
+    end
+end
+-- }}}
+
+-- {{{ Workspace launcher profiles
+local home = os.getenv("HOME")
+workspace_profiles = {
+    atlas    = { color = "#cc3333", prefix = "atlas",    row = "top",    near = 2,  cwd = home .. "/code/atlas" },
+    epic     = { color = "#9933cc", prefix = "epic",     row = "bottom", near = 13, cwd = home .. "/code/atlas" },
+    research = { color = "#33aa55", prefix = "research", row = "bottom", near = 11,  cwd = home .. "/code/atlas" },
+    dev      = { color = "#ccaa33", prefix = "dev",      row = "bottom", near = 17,  cwd = home .. "/projects/chris" },
+    custom   = { color = nil,       prefix = nil,        row = nil,      near = nil, cwd = nil },
+}
+
+function create_workspace(profile_name, label_suffix)
+    local profile = workspace_profiles[profile_name]
+    if not profile then return end
+    local s = awful.screen.focused()
+    if not s then return end
+
+    local first, last
+    if profile.row == "top" then first, last = 1, 10
+    elseif profile.row == "bottom" then first, last = 11, 20
+    else first, last = 1, 20 end
+
+    local candidates = {}
+    for i = first, last do table.insert(candidates, i) end
+    local seed = profile.near or first
+    table.sort(candidates, function(a, b) return math.abs(a - seed) < math.abs(b - seed) end)
+
+    local chosen
+    for _, idx in ipairs(candidates) do
+        local t = s.tags[idx]
+        if t and #t:clients() == 0 and not tag_labels[t] then
+            chosen = t
+            break
+        end
+    end
+
+    if not chosen then
+        naughty.notify({ title = "Workspace launcher", text = "No empty tag in " .. (profile.row or "any") .. " row" })
+        return
+    end
+
+    local label
+    if label_suffix and label_suffix ~= "" then
+        if profile.prefix and profile.prefix ~= "" then
+            label = profile.prefix .. "-" .. label_suffix
+        else
+            label = label_suffix
+        end
+    elseif profile.prefix and profile.prefix ~= "" then
+        label = profile.prefix
+    end
+    if label then
+        tag_labels[chosen] = label
+        if chosen.index then labels_by_index[chosen.index] = label end
+        chosen:emit_signal("property::name")
+        save_tag_labels()
+    end
+
+    if profile.color then
+        tag_colors[chosen] = profile.color
+        if chosen.index then colors_by_index[chosen.index] = profile.color end
+        chosen:emit_signal("property::name")
+        save_tag_colors()
+    end
+
+    chosen:view_only()
+
+    if profile.cwd then
+        awful.spawn(terminal .. " --directory=" .. profile.cwd)
     end
 end
 -- }}}
@@ -1080,6 +1152,8 @@ globalkeys = gears.table.join(
               {description = "app finder", group = "launcher"}),
     awful.key({ modkey }, "a", function () awful.util.spawn("rofi -show window") end,
               {description = "window list", group = "launcher"}),
+    awful.key({ modkey, "Shift" }, "a", function () awful.util.spawn_with_shell(os.getenv("HOME") .. "/.config/awesome/workspace-launcher.sh") end,
+              {description = "workspace launcher", group = "launcher"}),
     awful.key({ modkey }, "c", function () awful.util.spawn_with_shell("rofi -modi 'clipboard:greenclip print' -show clipboard") end,
               {description = "clipboard history", group = "launcher"}),
     awful.key({ modkey }, "v", function () awful.util.spawn_with_shell("rofi -modi 'clipboard:greenclip print' -show clipboard -kb-accept-entry Return -kb-cancel Escape && sleep 0.05 && xdotool key --clearmodifiers ctrl+v") end,
