@@ -821,6 +821,11 @@ globalkeys = gears.table.join(
             awful.spawn.with_shell("~/.local/bin/speech_to_text.sh")
         end,
         {description = "speech to text", group="system"}),
+    awful.key({ modkey, "Shift"   }, "p",
+        function ()
+            awful.spawn.with_shell("/home/fattarsi/projects/chris/virtual-cam/repo/pixel-cam --device /dev/video4 --width 1280 --height 720")
+        end,
+        {description = "toggle pixel-art virtual camera", group="system"}),
     awful.key({}, "XF86MonBrightnessUp",
         function ()
             awful.spawn("brightnessctl set +5%", false)
