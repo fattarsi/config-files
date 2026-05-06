@@ -73,6 +73,7 @@ bin/*
 !.local/bin/niri-import-workspace-names.sh
 !.local/bin/niri-jump-urgent.sh
 !.local/bin/niri-overview-zoom.sh
+!.local/bin/niri-overview-opacity.sh
 !.local/bin/niri-claude-notify-listener.py
 !.local/bin/niri-eww-state.sh
 !.local/bin/niri-eww-volume.sh

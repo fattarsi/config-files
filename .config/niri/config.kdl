@@ -298,6 +298,9 @@ spawn-at-startup "mako"
 // Replay any saved workspace names from ~/.config/niri/workspace-names.json
 spawn-at-startup "/home/fattarsi/.local/bin/niri-restore-workspace-names.sh"
 
+// Toggle inactive-window opacity off while the overview is open, back on after.
+spawn-at-startup "/home/fattarsi/.local/bin/niri-overview-opacity.sh"
+
 // Claude Code status listener — UDP listener that sets niri urgent flag and
 // shows a clickable notification when Claude is waiting for input.
 spawn-at-startup "/home/fattarsi/.local/bin/niri-claude-notify-listener.py"
@@ -344,6 +347,16 @@ animations {
 // Window rules let you adjust behavior for individual windows.
 // Find more information on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Window-Rules
+
+// Inactive-window opacity. Toggled at runtime by niri-overview-opacity.sh:
+// while the overview is open, the value is bumped to 1.0 so windows render
+// solid in overview mode. Don't reformat the OVERVIEW_TOGGLE marker —
+// niri-overview-opacity.sh keys off it.
+window-rule {
+    match is-focused=false
+    opacity 0.92
+    // OVERVIEW_TOGGLE
+}
 
 // Work around WezTerm's initial configure bug
 // by setting an empty default-column-width.
@@ -403,6 +416,7 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+E hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
     Mod+U hotkey-overlay-title="Jump to urgent window" { spawn "/home/fattarsi/.local/bin/niri-jump-urgent.sh"; }
+    Mod+Shift+Z hotkey-overlay-title="Force-quit Zoom" { spawn-sh "pkill -f /opt/zoom/zoom"; }
     Mod+Alt+Up   hotkey-overlay-title="Overview zoom in"  { spawn "/home/fattarsi/.local/bin/niri-overview-zoom.sh" "in"; }
     Mod+Alt+Down hotkey-overlay-title="Overview zoom out" { spawn "/home/fattarsi/.local/bin/niri-overview-zoom.sh" "out"; }
     Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
