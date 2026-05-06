@@ -57,6 +57,20 @@ bin/*
 !bin/speech_to_text.sh
 !bin/external-only.sh
 
+# Niri helper scripts (referenced by config.kdl keybinds and spawn-at-startup)
+!.local
+.local/*
+!.local/bin
+.local/bin/*
+!.local/bin/niri-color-cycle.sh
+!.local/bin/niri-color-pick.sh
+!.local/bin/niri-rename-workspace.sh
+!.local/bin/niri-restore-workspace-names.sh
+!.local/bin/niri-import-workspace-names.sh
+!.local/bin/niri-jump-urgent.sh
+!.local/bin/niri-overview-zoom.sh
+!.local/bin/niri-claude-notify-listener.py
+
 # Niri (wayland WM)
 !.config/niri
 .config/niri/*
