@@ -90,6 +90,14 @@ bin/*
 .config/mako/*
 !.config/mako/config
 
+# systemd user drop-in for niri.service
+!.config/systemd
+.config/systemd/*
+!.config/systemd/user
+.config/systemd/user/*
+!.config/systemd/user/niri.service.d
+!.config/systemd/user/niri.service.d/*
+
 # Niri (wayland WM)
 !.config/niri
 .config/niri/*
