@@ -92,7 +92,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # opencode
-export PATH=/home/fattarsi/.opencode/bin:$PATH
+export PATH=$HOME/.opencode/bin:$PATH
 
 # Rig environment variables
 [ -f ~/.config/rig/env.sh ] && source ~/.config/rig/env.sh
@@ -131,7 +131,7 @@ function n() {
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
 # bun completions
-[ -s "/home/fattarsi/.bun/_bun" ] && source "/home/fattarsi/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
