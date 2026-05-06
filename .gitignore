@@ -74,7 +74,6 @@ bin/*
 !.local/bin/niri-jump-urgent.sh
 !.local/bin/niri-overview-zoom.sh
 !.local/bin/niri-claude-notify-listener.py
-!.local/bin/niri-eww-net.sh
 !.local/bin/niri-eww-state.sh
 !.local/bin/niri-eww-volume.sh
 
