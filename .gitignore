@@ -56,3 +56,9 @@ bin/*
 !bin/volume-hotkeys.sh
 !bin/speech_to_text.sh
 !bin/external-only.sh
+
+# Niri (wayland WM)
+!.config/niri
+.config/niri/*
+!.config/niri/config.kdl
+!.config/niri/app-colors.conf
