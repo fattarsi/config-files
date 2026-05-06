@@ -1,0 +1,89 @@
+;; ─────────────────────────────────────────────────────────────────
+;; eww bar config — replaces waybar; gives per-workspace + per-column
+;; click and smooth cairo graphs.
+;; ─────────────────────────────────────────────────────────────────
+
+;; Listen to niri-eww-state.sh which emits a JSON array of workspaces,
+;; each with its columns + per-app/per-window color resolved.
+(deflisten niri_state :initial "[]"
+  "/home/fattarsi/.local/bin/niri-eww-state.sh")
+
+;; Focused window title (re-queries on every niri Window event)
+(deflisten focused_title :initial ""
+  "niri msg event-stream 2>/dev/null | while IFS= read -r l; do case \"$l\" in *Window*) niri msg --json focused-window 2>/dev/null | jq -r '.title // \"\"' ;; esac; done")
+
+;; Volume updates instantly via pactl subscribe (no 2s poll lag).
+(deflisten volume :initial "0"
+  "/home/fattarsi/.local/bin/niri-eww-volume.sh")
+
+(defpoll net_rate :interval "2s" :initial "0"
+  "/home/fattarsi/.local/bin/niri-eww-net.sh")
+
+;; ─────────────────────────────────────────────────────────────────
+;; Widgets
+;; ─────────────────────────────────────────────────────────────────
+
+(defwidget minimap []
+  (eventbox
+    :onscroll "if [ {} = up ]; then niri msg action focus-column-left; else niri msg action focus-column-right; fi"
+    (box :class "minimap" :orientation "h" :spacing 14 :space-evenly false :halign "start"
+      (for ws in niri_state
+        (workspace_view :ws ws)))))
+
+(defwidget workspace_view [ws]
+  (box :class "ws-block" :orientation "h" :spacing 2 :space-evenly false
+    (button :class {ws.is_focused
+                      ? (ws.has_urgent ? "ws-label focused urgent" : "ws-label focused")
+                      : (ws.has_urgent ? "ws-label urgent" : "ws-label")}
+            :onclick "niri msg action focus-workspace ${ws.idx}"
+            (label :text {ws.name != "" ? ws.name : "${ws.idx}"}))
+    (for col in {ws.columns}
+      (button :class {col.is_urgent
+                        ? "col-box urgent"
+                        : (ws.is_focused && col.is_focused_col ? "col-box focused-col" : "col-box")}
+              :style "color: ${col.color};"
+              :onclick "niri msg action focus-window --id ${col.primary_window_id}"
+              (label :text {col.stack_size > 1 ? "▣" : "■"})))))
+
+(defwidget left_section []
+  (box :orientation "h" :halign "start" :space-evenly false
+    (minimap)))
+
+(defwidget center_section []
+  (box :orientation "h" :halign "center" :space-evenly false
+    (label :class "title" :text focused_title :limit-width 80)))
+
+(defwidget right_section []
+  (box :orientation "h" :halign "end" :space-evenly false :spacing 8
+    (graph :class "graph cpu" :value {EWW_CPU.avg} :time-range "60s"
+           :min 0 :max 100 :thickness 2 :line-style "round")
+    (graph :class "graph mem" :value {EWW_RAM.used_mem_perc} :time-range "60s"
+           :min 0 :max 100 :thickness 2 :line-style "round")
+    (graph :class "graph net" :value net_rate :time-range "60s"
+           :min 0 :max 100 :dynamic true :thickness 2 :line-style "round")
+    (systray :class "tray" :icon-size 16 :spacing 8 :space-evenly false)
+    (label :class "stat vol" :text "🔊 ${volume}%")
+    (label :class "stat bat"
+           :text {EWW_BATTERY.BAT0.status == "Charging"
+                    ? "⚡ ${EWW_BATTERY.BAT0.capacity}%"
+                    : EWW_BATTERY.BAT0.capacity >= 80 ? "🔋 ${EWW_BATTERY.BAT0.capacity}%"
+                    : EWW_BATTERY.BAT0.capacity >= 20 ? "🔋 ${EWW_BATTERY.BAT0.capacity}%"
+                    : "🪫 ${EWW_BATTERY.BAT0.capacity}%"})
+    (label :class "clock" :text {formattime(EWW_TIME, "%a %b %d  %H:%M")})))
+
+(defwidget bar []
+  (centerbox :orientation "h"
+    (left_section)
+    (center_section)
+    (right_section)))
+
+;; ─────────────────────────────────────────────────────────────────
+;; Window
+;; ─────────────────────────────────────────────────────────────────
+
+(defwindow bar
+  :monitor 0
+  :exclusive true
+  :stacking "fg"
+  :geometry (geometry :x "0" :y "0" :width "100%" :height "28px" :anchor "top center")
+  (bar))

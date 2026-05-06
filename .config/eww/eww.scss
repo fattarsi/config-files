@@ -1,0 +1,130 @@
+// eww styles — clean, no GTK theme leftovers.
+
+* {
+  font-family: "DejaVu Sans Mono", monospace;
+  font-size: 13px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  box-shadow: none;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+
+// Kill default GTK button/window decorations that show up as faint outlines.
+window {
+  background-color: rgba(20, 20, 24, 0.85);
+  color: #e0e0e0;
+  border: none;
+  box-shadow: none;
+}
+
+button {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  padding: 0;
+}
+
+button:focus, button:active, button:checked {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+// ─── Minimap ─────────────────────────────────────────────────────
+.minimap {
+  padding: 0 8px;
+}
+
+.ws-label {
+  color: #888;
+  padding: 0 4px;
+  min-width: 0;
+}
+
+// Focused workspace: bold + bright, NO underline.
+.ws-label.focused {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.ws-label:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+// All column boxes reserve the same underline space (transparent by default)
+// so the focused one with a real underline doesn't shift others vertically.
+// Inset box-shadow draws the underline INSIDE the cell, snug against the box
+// character — no layout shift, no glyph-descender gap.
+.col-box {
+  padding: 0 2px;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  font-size: 16px;
+  background: transparent;
+}
+
+.col-box label {
+  margin: 0;
+  padding: 0;
+}
+
+// Focused column: subtle blue background tint behind the character.
+// (Avoids the descender-gap issue an underline has; the cue follows the cell.)
+.col-box.focused-col {
+  background: rgba(127, 200, 255, 0.25);
+}
+
+// Urgent column: red-orange background — overrides focused-col styling so the
+// alert is unmistakable.
+.col-box.urgent {
+  background: rgba(240, 96, 96, 0.45);
+}
+
+// Urgent workspace label: orange tint, bold.
+.ws-label.urgent {
+  color: #f0c060;
+  font-weight: bold;
+}
+
+.ws-label.focused.urgent {
+  color: #ffd070;
+}
+
+.col-box:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+// ─── Center: window title ────────────────────────────────────────
+.title {
+  color: #c0c0c0;
+}
+
+// ─── Right: stats / graphs ───────────────────────────────────────
+.graph {
+  min-width: 100px;
+  min-height: 22px;
+  margin: 1px 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.graph.cpu  { color: #ff6e67; }
+.graph.mem  { color: #5af78e; }
+.graph.net  { color: #57c7ff; }
+
+.tray, .clock {
+  padding: 0 8px;
+}
+
+// Volume & battery share a tight pair — minimal padding between them.
+.stat {
+  padding: 0 4px;
+}
+
+.vol { padding-right: 2px; }
+.bat { padding-left: 2px; color: #b0b0b0; }
