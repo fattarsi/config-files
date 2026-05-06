@@ -106,25 +106,45 @@ button:focus, button:active, button:checked {
 }
 
 // ─── Right: stats / graphs ───────────────────────────────────────
-.graph {
-  min-width: 100px;
-  min-height: 22px;
+// SVG history graphs — colors and area-fill come from the SVG itself.
+.graph-img {
   margin: 1px 4px;
-  background: rgba(0, 0, 0, 0.3);
 }
 
-.graph.cpu  { color: #ff6e67; }
-.graph.mem  { color: #5af78e; }
-.graph.net  { color: #57c7ff; }
-
-.tray, .clock {
-  padding: 0 8px;
+.clock {
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  color: #e0e0e0;
+}
+.clock:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
 }
 
-// Volume & battery share a tight pair — minimal padding between them.
-.stat {
+// Drawers — collapsed by default, click ‹ / › to toggle.
+.tray-drawer, .graphs-drawer, .volbat-drawer { padding: 0 4px; }
+.tray-toggle, .graphs-toggle, .volbat-toggle {
   padding: 0 4px;
+  color: #888;
+  background: transparent;
+  border: none;
 }
+.tray-toggle:hover, .graphs-toggle:hover, .volbat-toggle:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.tray { padding: 0 2px; }
 
-.vol { padding-right: 2px; }
-.bat { padding-left: 2px; color: #b0b0b0; }
+// Volume + battery: ultra-tight pair.
+.volbat { padding: 0 6px; }
+.stat { padding: 0; }
+.vol { padding-right: 4px; }
+.bat { color: #b0b0b0; padding-left: 0; }
+
+// Calendar popup
+.calendar-box {
+  background-color: rgba(20, 20, 24, 0.95);
+  border: 1px solid #444;
+  padding: 8px;
+}
+.calendar {
+  font-size: 14px;
+}

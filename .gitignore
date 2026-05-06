@@ -76,6 +76,7 @@ bin/*
 !.local/bin/niri-claude-notify-listener.py
 !.local/bin/niri-eww-state.sh
 !.local/bin/niri-eww-volume.sh
+!.local/bin/niri-graph-svg.py
 
 # Eww (status bar — replaces waybar)
 !.config/eww

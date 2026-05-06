@@ -5,6 +5,11 @@
 
 ;; Listen to niri-eww-state.sh which emits a JSON array of workspaces,
 ;; each with its columns + per-app/per-window color resolved.
+;; Drawer state: collapsed by default.
+(defvar tray_open false)
+(defvar graphs_open false)
+(defvar volbat_open false)
+
 (deflisten niri_state :initial "[]"
   "/home/fattarsi/.local/bin/niri-eww-state.sh")
 
@@ -16,8 +21,11 @@
 (deflisten volume :initial "0"
   "/home/fattarsi/.local/bin/niri-eww-volume.sh")
 
-(defpoll net_rate :interval "2s" :initial "0"
-  "/home/fattarsi/.local/bin/niri-eww-net.sh")
+;; SVG-based history graphs — each poll generates an SVG and emits its path.
+;; The path changes per tick so eww's image widget reloads.
+(defpoll cpu_svg :interval "1s" :initial "" "/home/fattarsi/.local/bin/niri-graph-svg.py cpu")
+(defpoll mem_svg :interval "1s" :initial "" "/home/fattarsi/.local/bin/niri-graph-svg.py mem")
+(defpoll net_svg :interval "1s" :initial "" "/home/fattarsi/.local/bin/niri-graph-svg.py net")
 
 ;; ─────────────────────────────────────────────────────────────────
 ;; Widgets
@@ -55,21 +63,49 @@
 
 (defwidget right_section []
   (box :orientation "h" :halign "end" :space-evenly false :spacing 8
-    (graph :class "graph cpu" :value {EWW_CPU.avg} :time-range "60s"
-           :min 0 :max 100 :thickness 2 :line-style "round")
-    (graph :class "graph mem" :value {EWW_RAM.used_mem_perc} :time-range "60s"
-           :min 0 :max 100 :thickness 2 :line-style "round")
-    (graph :class "graph net" :value net_rate :time-range "60s"
-           :min 0 :max 100 :dynamic true :thickness 2 :line-style "round")
-    (systray :class "tray" :icon-size 16 :spacing 8 :space-evenly false)
+    (graphs_drawer)
+    (tray_drawer)
+    (volbat_drawer)
+    (button :class "clock"
+            :onclick "eww open --toggle calendar"
+            (label :text {formattime(EWW_TIME, "%a %b %d  %H:%M")}))))
+
+(defwidget graphs_drawer []
+  (box :class "graphs-drawer" :orientation "h" :space-evenly false :spacing 0
+    (button :class "graphs-toggle"
+            :onclick "eww update graphs_open=${!graphs_open}"
+            (label :text {graphs_open ? "›" : "‹"}))
+    (revealer :transition "slideleft" :reveal graphs_open :duration "200ms"
+      (box :orientation "h" :spacing 4
+        (image :class "graph-img cpu" :path cpu_svg :image-width 77 :image-height 36)
+        (image :class "graph-img mem" :path mem_svg :image-width 77 :image-height 36)
+        (image :class "graph-img net" :path net_svg :image-width 77 :image-height 36)))))
+
+(defwidget tray_drawer []
+  (box :class "tray-drawer" :orientation "h" :space-evenly false :spacing 0
+    (button :class "tray-toggle"
+            :onclick "eww update tray_open=${!tray_open}"
+            (label :text {tray_open ? "›" : "‹"}))
+    (revealer :transition "slideleft" :reveal tray_open :duration "200ms"
+      (systray :class "tray" :icon-size 16 :spacing 6 :space-evenly false))))
+
+(defwidget vol_bat []
+  (box :class "volbat" :orientation "h" :space-evenly false :spacing 0
     (label :class "stat vol" :text "🔊 ${volume}%")
     (label :class "stat bat"
            :text {EWW_BATTERY.BAT0.status == "Charging"
                     ? "⚡ ${EWW_BATTERY.BAT0.capacity}%"
-                    : EWW_BATTERY.BAT0.capacity >= 80 ? "🔋 ${EWW_BATTERY.BAT0.capacity}%"
-                    : EWW_BATTERY.BAT0.capacity >= 20 ? "🔋 ${EWW_BATTERY.BAT0.capacity}%"
-                    : "🪫 ${EWW_BATTERY.BAT0.capacity}%"})
-    (label :class "clock" :text {formattime(EWW_TIME, "%a %b %d  %H:%M")})))
+                    : EWW_BATTERY.BAT0.capacity < 20
+                      ? "🪫 ${EWW_BATTERY.BAT0.capacity}%"
+                      : "🔋 ${EWW_BATTERY.BAT0.capacity}%"})))
+
+(defwidget volbat_drawer []
+  (box :class "volbat-drawer" :orientation "h" :space-evenly false :spacing 0
+    (button :class "volbat-toggle"
+            :onclick "eww update volbat_open=${!volbat_open}"
+            (label :text {volbat_open ? "›" : "‹"}))
+    (revealer :transition "slideleft" :reveal volbat_open :duration "200ms"
+      (vol_bat))))
 
 (defwidget bar []
   (centerbox :orientation "h"
@@ -85,5 +121,13 @@
   :monitor 0
   :exclusive true
   :stacking "fg"
-  :geometry (geometry :x "0" :y "0" :width "100%" :height "28px" :anchor "top center")
+  :geometry (geometry :x "0" :y "0" :width "100%" :height "40px" :anchor "top center")
   (bar))
+
+;; Popup calendar — opened/closed by clicking the clock label.
+(defwindow calendar
+  :monitor 0
+  :stacking "fg"
+  :geometry (geometry :x "0" :y "32px" :width "300px" :height "260px" :anchor "top right")
+  (box :class "calendar-box" :orientation "v"
+    (calendar :class "calendar")))
