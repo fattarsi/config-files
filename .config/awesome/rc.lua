@@ -823,7 +823,7 @@ globalkeys = gears.table.join(
         {description = "speech to text", group="system"}),
     awful.key({ modkey, "Shift"   }, "p",
         function ()
-            awful.spawn.with_shell("/home/fattarsi/projects/chris/virtual-cam/repo/pixel-cam --device /dev/video4 --width 1280 --height 720")
+            awful.spawn.with_shell(os.getenv("HOME") .. "/projects/chris/virtual-cam/repo/pixel-cam --device /dev/video4 --width 1280 --height 720")
         end,
         {description = "toggle pixel-art virtual camera", group="system"}),
     awful.key({}, "XF86MonBrightnessUp",
@@ -1831,8 +1831,12 @@ end)
 -- Touchpad tap-to-click
 awful.spawn.with_shell("xinput set-prop 'ELAN0412:01 04F3:32EE Touchpad' 'libinput Tapping Enabled' 1 2>/dev/null")
 
--- Clipboard manager daemon
-awful.spawn.with_shell("pgrep -x greenclip || greenclip daemon &")
+-- Clipboard manager daemon.
+-- pgrep -f "greenclip daemon" matches the daemon specifically; the previous
+-- pgrep -x greenclip also matched a stuck `greenclip print` left over from
+-- a killed rofi invocation, which would skip spawning the daemon and leave
+-- the clipboard menu broken until manual cleanup.
+awful.spawn.with_shell("pgrep -f 'greenclip daemon' >/dev/null || setsid greenclip daemon >/dev/null 2>&1 </dev/null &")
 
 -- Double-tap Home → End
 awful.spawn.with_line_callback("bash " .. os.getenv("HOME") .. "/.config/awesome/double-tap-home.sh", {
