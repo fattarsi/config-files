@@ -39,6 +39,29 @@ button:focus, button:active, button:checked {
   padding: 0 8px;
 }
 
+// "More workspaces off-screen" indicator. Visible only when the windowed
+// slice doesn't include the full set; carries the count.
+.minimap-edge {
+  color: #7fc8ff;
+  background: rgba(127, 200, 255, 0.10);
+  padding: 0 6px;
+  margin: 2px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.minimap-chevron {
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 0 6px;
+  font-size: 16px;
+}
+.minimap-chevron:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .ws-label {
   color: #888;
   padding: 0 4px;
@@ -109,6 +132,18 @@ button:focus, button:active, button:checked {
 // SVG history graphs — colors and area-fill come from the SVG itself.
 .graph-img {
   margin: 1px 4px;
+}
+
+// Hover/click feedback on each resource graph (eventbox wraps the image).
+.graph-box {
+  border-radius: 2px;
+  transition: 120ms ease;
+}
+.graph-box:hover {
+  background: rgba(127, 200, 255, 0.18);
+}
+.graph-box:active {
+  background: rgba(127, 200, 255, 0.32);
 }
 
 .clock {

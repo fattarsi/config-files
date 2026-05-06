@@ -10,8 +10,9 @@
 (defvar graphs_open false)
 (defvar volbat_open false)
 
-(deflisten niri_state :initial "[]"
-  "/home/fattarsi/.local/bin/niri-eww-state.sh")
+
+(deflisten niri_state :initial '{"ws":[],"focused_li":0,"total":0,"start":0,"end":0,"more_left":0,"more_right":0}'
+  "niri-eww-state.sh")
 
 ;; Focused window title (re-queries on every niri Window event)
 (deflisten focused_title :initial ""
@@ -19,24 +20,47 @@
 
 ;; Volume updates instantly via pactl subscribe (no 2s poll lag).
 (deflisten volume :initial "0"
-  "/home/fattarsi/.local/bin/niri-eww-volume.sh")
+  "niri-eww-volume.sh")
 
 ;; SVG-based history graphs — each poll generates an SVG and emits its path.
 ;; The path changes per tick so eww's image widget reloads.
-(defpoll cpu_svg :interval "1s" :initial "" "/home/fattarsi/.local/bin/niri-graph-svg.py cpu")
-(defpoll mem_svg :interval "1s" :initial "" "/home/fattarsi/.local/bin/niri-graph-svg.py mem")
-(defpoll net_svg :interval "1s" :initial "" "/home/fattarsi/.local/bin/niri-graph-svg.py net")
+(defpoll cpu_svg :interval "1s" :initial "" "niri-graph-svg.py cpu")
+(defpoll mem_svg :interval "1s" :initial "" "niri-graph-svg.py mem")
+(defpoll net_svg :interval "1s" :initial "" "niri-graph-svg.py net")
+
+;; Hover tooltips — top processes per metric, refreshed every 3 s.
+(defpoll cpu_top :interval "3s" :initial "" "niri-graph-tooltip.sh cpu")
+(defpoll mem_top :interval "3s" :initial "" "niri-graph-tooltip.sh mem")
+(defpoll net_top :interval "3s" :initial "" "niri-graph-tooltip.sh net")
 
 ;; ─────────────────────────────────────────────────────────────────
 ;; Widgets
 ;; ─────────────────────────────────────────────────────────────────
 
 (defwidget minimap []
+  ;; State script emits a windowed slice (`ws`) centered on the focused
+  ;; workspace, plus `more_left`/`more_right` counts.
+  ;;
+  ;; Layout uses centerbox (start | center | end slots) for guaranteed
+  ;; anchoring: start packs left, end packs right.
+  ;;   ┌──────── start ────────┐ ┌ center ┐ ┌─ end ─┐
+  ;;   [‹N] [ws0] [ws1] ... [wsK]            [N›]
   (eventbox
-    :onscroll "if [ {} = up ]; then niri msg action focus-column-left; else niri msg action focus-column-right; fi"
-    (box :class "minimap" :orientation "h" :spacing 14 :space-evenly false :halign "start"
-      (for ws in niri_state
-        (workspace_view :ws ws)))))
+    :onscroll "if [ {} = up ]; then niri-focus-column-or-ws.sh left; else niri-focus-column-or-ws.sh right; fi"
+    (centerbox :class "minimap" :orientation "h" :hexpand true :halign "fill"
+      ;; START: left indicator + workspaces.
+      (box :orientation "h" :spacing 14 :space-evenly false :halign "start"
+        (label :class "minimap-edge left"
+               :text "‹${niri_state.more_left}"
+               :visible {niri_state.more_left > 0})
+        (for ws in {niri_state.ws}
+          (workspace_view :ws ws)))
+      ;; CENTER: empty placeholder so centerbox has its three slots.
+      (box)
+      ;; END: right indicator, pinned to the right edge of the minimap area.
+      (label :class "minimap-edge right"
+             :text "${niri_state.more_right}›"
+             :visible {niri_state.more_right > 0}))))
 
 (defwidget workspace_view [ws]
   (box :class "ws-block" :orientation "h" :spacing 2 :space-evenly false
@@ -54,15 +78,18 @@
               (label :text {col.stack_size > 1 ? "▣" : "■"})))))
 
 (defwidget left_section []
-  (box :orientation "h" :halign "start" :space-evenly false
+  ;; Fixed width gives the minimap a stable anchor for its right-edge "N›"
+  ;; indicator. Without this the inner hexpand spacer has no slack to push
+  ;; the indicator rightward, so it ends up glued to the last workspace.
+  (box :orientation "h" :halign "start" :space-evenly false :width 800
     (minimap)))
 
 (defwidget center_section []
-  (box :orientation "h" :halign "center" :space-evenly false
-    (label :class "title" :text focused_title :limit-width 80)))
+  (box :orientation "h" :halign "center" :space-evenly false))
 
 (defwidget right_section []
   (box :orientation "h" :halign "end" :space-evenly false :spacing 8
+    (label :class "title" :text focused_title :limit-width 60)
     (graphs_drawer)
     (tray_drawer)
     (volbat_drawer)
@@ -77,9 +104,15 @@
             (label :text {graphs_open ? "›" : "‹"}))
     (revealer :transition "slideleft" :reveal graphs_open :duration "200ms"
       (box :orientation "h" :spacing 4
-        (image :class "graph-img cpu" :path cpu_svg :image-width 77 :image-height 36)
-        (image :class "graph-img mem" :path mem_svg :image-width 77 :image-height 36)
-        (image :class "graph-img net" :path net_svg :image-width 77 :image-height 36)))))
+        (eventbox :class "graph-box" :tooltip cpu_top
+                  :onclick "niri-btop-toggle.sh"
+          (image :class "graph-img cpu" :path cpu_svg :image-width 77 :image-height 36))
+        (eventbox :class "graph-box" :tooltip mem_top
+                  :onclick "niri-btop-toggle.sh"
+          (image :class "graph-img mem" :path mem_svg :image-width 77 :image-height 36))
+        (eventbox :class "graph-box" :tooltip net_top
+                  :onclick "niri-btop-toggle.sh"
+          (image :class "graph-img net" :path net_svg :image-width 77 :image-height 36))))))
 
 (defwidget tray_drawer []
   (box :class "tray-drawer" :orientation "h" :space-evenly false :spacing 0

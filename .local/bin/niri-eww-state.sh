@@ -52,16 +52,20 @@ emit() {
               | map({key: (.[0].workspace_id|tostring), value: .})
               | from_entries) as $by_ws
         |
-        $ws | sort_by(.idx) | map(
-            . as $w
+        ($ws
+        | sort_by(.idx)
+        | [.[] | select((($by_ws[(.id|tostring)] // []) | length) > 0 or .is_focused)]
+        | to_entries
+        | map(
+            .key as $list_index
+            | .value as $w
             | ($by_ws[($w.id|tostring)] // []) as $ws_wins
-            | ($ws_wins | length) as $n
-            | select($n > 0 or $w.is_focused)
             | ($ws_wins | group_by(.layout.pos_in_scrolling_layout[0])
                         | sort_by(.[0].layout.pos_in_scrolling_layout[0])) as $cols
             | ($ws_wins | map(select(.is_focused) | .layout.pos_in_scrolling_layout[0]) | first // -1) as $focused_col_idx
             | (any($ws_wins[]; .is_urgent == true)) as $ws_has_urgent
             | {
+                list_index: $list_index,
                 idx: $w.idx,
                 id: $w.id,
                 name: ($w.name // ""),
@@ -81,14 +85,38 @@ emit() {
                       }
                 ))
               }
-        )
+        )) as $workspaces
+        | ($workspaces | length) as $total
+        | ([$workspaces[] | select(.is_focused) | .list_index] | first // 0) as $focused
+        # Windowed view centered on the focused workspace so it always stays
+        # visible as the user navigates. Window size kept modest; tuned from
+        # the bar width cap (~1100px) and observed label widths.
+        | 4 as $radius
+        | (($radius * 2) + 1) as $win
+        | ([0, ($focused - $radius)] | max) as $s0
+        | ([$s0, ($total - $win)] | min) as $s1
+        | ([0, $s1] | max) as $start
+        | ([($start + $win), $total] | min) as $end
+        | {
+            ws: $workspaces[$start:$end],
+            focused_li: $focused,
+            total: $total,
+            start: $start,
+            end: $end,
+            more_left: $start,
+            more_right: ($total - $end)
+          }
     ' 2>/dev/null
 }
 
 trap 'emit' USR1
 emit
-niri msg event-stream 2>/dev/null | while IFS= read -r line; do
+
+# Process substitution (not a pipe) so the while loop runs in the SAME shell
+# as the trap. With a pipe, the loop runs in a subshell that doesn't receive
+# SIGUSR1 — color-cycle/pick wouldn't refresh until a real niri event came in.
+while IFS= read -r line; do
     case "$line" in
         *Workspace*|*Window*) emit ;;
     esac
-done
+done < <(niri msg event-stream 2>/dev/null)
