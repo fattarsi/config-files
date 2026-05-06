@@ -1,4 +1,11 @@
 default-timeout=6000
+
+# Left-click invokes the notification's default action (focuses the app that
+# sent it, when the app provides one). Right-click dismisses. Middle-click
+# dismisses all.
+on-button-left=invoke-default-action
+on-button-right=dismiss
+on-button-middle=dismiss-all
 ignore-timeout=0
 border-radius=4
 margin=8

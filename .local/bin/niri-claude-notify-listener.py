@@ -108,9 +108,9 @@ def notify_and_focus(title, body, win_id):
     Runs detached so the listener can process more events."""
     if win_id:
         cmd = (
-            f'a=$(notify-send -a Claude -A focus=Open -t 20000 '
+            f'a=$(notify-send -a Claude -A default=Open -t 20000 '
             f'"{title}" "{body}" 2>/dev/null); '
-            f'[ "$a" = focus ] && niri msg action focus-window --id {win_id} '
+            f'[ "$a" = default ] && niri msg action focus-window --id {win_id} '
             f'&& niri msg action unset-window-urgent --id {win_id} 2>/dev/null; '
             f'makoctl dismiss --all 2>/dev/null'
         )
