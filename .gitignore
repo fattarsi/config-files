@@ -8,6 +8,10 @@
 !.gitconfig
 !.gitignore
 
+# One-off install scripts kept in $HOME for re-running on fresh machines
+!install-niri-nvidia-workaround.sh
+!install-waybar-build-deps.sh
+
 # Terminator
 !.config
 .config/*
