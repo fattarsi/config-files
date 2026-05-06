@@ -85,6 +85,11 @@ bin/*
 .config/kanshi/*
 !.config/kanshi/config
 
+# Mako (wayland notification daemon)
+!.config/mako
+.config/mako/*
+!.config/mako/config
+
 # Niri (wayland WM)
 !.config/niri
 .config/niri/*

@@ -1,0 +1,18 @@
+default-timeout=6000
+ignore-timeout=0
+border-radius=4
+margin=8
+padding=8,12
+font=DejaVu Sans Mono 11
+background-color=#141418ee
+text-color=#e0e0e0
+border-color=#7fc8ff
+border-size=1
+max-history=50
+anchor=top-right
+
+# Claude alerts: longer timeout (20s) so they're easier to catch
+[app-name=Claude]
+default-timeout=20000
+border-color=#9933cc
+group-by=app-name
