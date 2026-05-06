@@ -27,6 +27,10 @@ else
     jq --arg w "$wid" --arg c "$next" '.[$w] = $c' "$TAGS_FILE" > "$TAGS_FILE.tmp" && mv "$TAGS_FILE.tmp" "$TAGS_FILE"
 fi
 
-# Wake up the minimap so the bar updates immediately
+# Wake up the minimap. Send SIGUSR1 *and* re-focus the same window — the
+# focus-window action fires a WindowFocusChanged event that niri-eww-state.sh
+# reliably catches via its event-stream loop, in case the SIGUSR1 trap is
+# stuck waiting on `read`.
 pid_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/niri-minimap.pid"
 [ -f "$pid_file" ] && kill -USR1 "$(cat "$pid_file")" 2>/dev/null
+niri msg action focus-window --id "$wid" 2>/dev/null || true
