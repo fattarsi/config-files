@@ -80,6 +80,11 @@ bin/*
 !.config/eww/eww.yuck
 !.config/eww/eww.scss
 
+# Kanshi (wayland xrandr equivalent — auto-applies monitor profiles)
+!.config/kanshi
+.config/kanshi/*
+!.config/kanshi/config
+
 # Niri (wayland WM)
 !.config/niri
 .config/niri/*
