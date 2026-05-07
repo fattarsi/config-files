@@ -54,6 +54,9 @@ emit() {
         |
         ($ws
         | sort_by(.idx)
+        # Hide internal workspaces (names starting with "_", e.g., "_scratch"
+        # used by niri-btop-toggle.sh) — they never belong in the minimap.
+        | [.[] | select(((.name // "") | startswith("_")) | not)]
         | [.[] | select((($by_ws[(.id|tostring)] // []) | length) > 0 or .is_focused)]
         | to_entries
         | map(
