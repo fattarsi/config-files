@@ -82,7 +82,7 @@ gestures {
 // zoom range 0..0.75 — higher = less zoom-out = workspaces appear larger and
 // less spread apart. backdrop is the area behind workspaces.
 overview {
-    zoom 0.50
+    zoom 0.10
     backdrop-color "#1a1a1a"
 }
 
@@ -611,27 +611,27 @@ binds {
     //
     // For example, with 2 workspaces + 1 empty, indices 3, 4, 5 and so on
     // will all refer to the 3rd workspace.
-    // Mod+<digit>: focus the Nth column in the current workspace (1=leftmost).
-    Mod+1 { spawn "niri-focus-column-n.sh" "1"; }
-    Mod+2 { spawn "niri-focus-column-n.sh" "2"; }
-    Mod+3 { spawn "niri-focus-column-n.sh" "3"; }
-    Mod+4 { spawn "niri-focus-column-n.sh" "4"; }
-    Mod+5 { spawn "niri-focus-column-n.sh" "5"; }
-    Mod+6 { spawn "niri-focus-column-n.sh" "6"; }
-    Mod+7 { spawn "niri-focus-column-n.sh" "7"; }
-    Mod+8 { spawn "niri-focus-column-n.sh" "8"; }
-    Mod+9 { spawn "niri-focus-column-n.sh" "9"; }
+    // Mod+<digit>: jump to workspace N.
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
 
-    // Mod+Shift+<digit>: jump to workspace N.
-    Mod+Shift+1 { focus-workspace 1; }
-    Mod+Shift+2 { focus-workspace 2; }
-    Mod+Shift+3 { focus-workspace 3; }
-    Mod+Shift+4 { focus-workspace 4; }
-    Mod+Shift+5 { focus-workspace 5; }
-    Mod+Shift+6 { focus-workspace 6; }
-    Mod+Shift+7 { focus-workspace 7; }
-    Mod+Shift+8 { focus-workspace 8; }
-    Mod+Shift+9 { focus-workspace 9; }
+    // Mod+Shift+<digit>: focus the Nth column in the current workspace (1=leftmost).
+    Mod+Shift+1 { spawn "niri-focus-column-n.sh" "1"; }
+    Mod+Shift+2 { spawn "niri-focus-column-n.sh" "2"; }
+    Mod+Shift+3 { spawn "niri-focus-column-n.sh" "3"; }
+    Mod+Shift+4 { spawn "niri-focus-column-n.sh" "4"; }
+    Mod+Shift+5 { spawn "niri-focus-column-n.sh" "5"; }
+    Mod+Shift+6 { spawn "niri-focus-column-n.sh" "6"; }
+    Mod+Shift+7 { spawn "niri-focus-column-n.sh" "7"; }
+    Mod+Shift+8 { spawn "niri-focus-column-n.sh" "8"; }
+    Mod+Shift+9 { spawn "niri-focus-column-n.sh" "9"; }
     Mod+Ctrl+1 { move-column-to-workspace 1; }
     Mod+Ctrl+2 { move-column-to-workspace 2; }
     Mod+Ctrl+3 { move-column-to-workspace 3; }
