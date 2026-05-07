@@ -78,6 +78,12 @@ bin/*
 !.local/bin/niri-eww-state.sh
 !.local/bin/niri-eww-volume.sh
 !.local/bin/niri-graph-svg.py
+!.local/bin/niri-graph-tooltip.sh
+!.local/bin/niri-btop-toggle.sh
+!.local/bin/niri-focus-column-n.sh
+!.local/bin/niri-focus-column-or-ws.sh
+!.local/bin/niri-new-workspace.sh
+!.local/bin/niri-terminal-cwd.sh
 
 # Eww (status bar — replaces waybar)
 !.config/eww
